@@ -122,6 +122,7 @@ function go(name,params){
   app.innerHTML="";
   SCREENS[name](params||{});
   window.scrollTo(0,0);
+  if(typeof renderChatFab==="function")renderChatFab();
 }
 function renderHeader(){
   var m=me();

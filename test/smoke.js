@@ -635,6 +635,72 @@ try{
   ok(hcT4.taken===true,"既存ルームあり→taken");
   roomTeardown();
 
+  section("チャット（定型文・自由入力）");
+  ok(CHAT_TAUNTS.indexOf("余裕ww")>=0&&CHAT_TAUNTS.length>=8,"煽り定型文を用意");
+  ok(CHAT_NICE.indexOf("よろしく！")>=0,"あいさつ定型文を用意");
+  FakePeer.reset();
+  R2.WD_MS=60000;R2.DROP_MS=10000;R2.REVEAL_MS=80;
+  R2.settings={count:1,dir:"mix",lv:"mix",limit:3};
+  var hcCh=await roomCreate();
+  ok(hcCh.ok,"ルーム作成");
+  var gC1=new FakeConn("gC1"),hC1=new FakeConn("hC1");
+  gC1.link(hC1);R2.peer._emit("connection",hC1);
+  gC1.open=true;hC1.open=true;gC1._emit("open");hC1._emit("open");
+  await sleep(20);
+  hC1._emit("data",{t:"hello",name:"猫",color:"#f00"});
+  var gC2=new FakeConn("gC2"),hC2=new FakeConn("hC2");
+  gC2.link(hC2);R2.peer._emit("connection",hC2);
+  gC2.open=true;hC2.open=true;gC2._emit("open");hC2._emit("open");
+  await sleep(20);
+  hC2._emit("data",{t:"hello",name:"犬",color:"#00f"});
+  await sleep(20);
+  var c1msgs=[],c2msgs=[];
+  gC1.on("data",function(m){if(m.t==="chat")c1msgs.push(m);});
+  gC2.on("data",function(m){if(m.t==="chat")c2msgs.push(m);});
+  sendChat("よろしく！");
+  await sleep(20);
+  ok(R2.chat.length===1&&R2.chat[0].text==="よろしく！","ホストの発言を記録");
+  ok(c1msgs.length===1&&c2msgs.length===1,"全員に配信");
+  hC1._emit("data",{t:"chat",text:"余裕ww"});
+  await sleep(20);
+  ok(R2.chat.length===2&&R2.chat[1].name==="猫","ゲストの発言をプレイヤー名付きで記録");
+  ok(c2msgs.length===2&&c2msgs[1].pid&&c2msgs[1].text==="余裕ww","他ゲストにも中継");
+  hC1._emit("data",{t:"chat",text:"   "});
+  await sleep(20);
+  ok(R2.chat.length===2,"空発言は無視");
+  await sleep(850); /* 連投制限（0.8秒）が解けるまで待つ */
+  hC1._emit("data",{t:"chat",text:new Array(100).join("x")});
+  await sleep(20);
+  ok(R2.chat.length===3&&R2.chat[2].text.length===80,"長文は80字に切断して受理");
+  /* ゲスト側の受信処理（モックホスト → 自分がゲスト） */
+  roomTeardown();
+  FakePeer.reset();
+  var mhC=new FakePeer("wbtl-v3-CHT1"),mhCc=null;
+  mhC.on("connection",function(c){mhCc=c;});
+  await roomJoin("CHT1");
+  await sleep(90);
+  mhCc.send({t:"welcome",pid:"gZ",code:"CHT1",settings:{count:5,dir:"mix",lv:"mix",limit:10},players:[
+    {id:"hOld",name:"旧ホスト",color:"#111",host:true,left:false,points:0},
+    {id:"gZ",name:"自分",color:"#f00",host:false,left:false,points:0}]});
+  await sleep(20);
+  mhCc.send({t:"chat",id:1,pid:"hOld",name:"旧ホスト",text:"準備はいい?"});
+  await sleep(20);
+  ok(R2.chat.length===1&&R2.chat[0].text==="準備はいい?"&&R2.chat[0].mine===false,"ゲストが他プレイヤーの発言を受信");
+  ok(R2.chatUnread===1,"未読バッジが増える");
+  mhCc.send({t:"chat",id:2,pid:"gZ",name:"自分",text:"自分の発言のエコー"});
+  await sleep(20);
+  ok(R2.chat.length===1,"自分の発言エコーは無視（重複しない）");
+  /* パネルUI */
+  openChatPanel();
+  var bodyKids=document.body.children;
+  var panel=bodyKids[bodyKids.length-1];
+  ok(panel.innerHTML.indexOf("余裕ww")>=0&&panel.innerHTML.indexOf("煽り")>=0,"定型文チップを表示");
+  ok(panel.innerHTML.indexOf("自由入力")>=0&&panel.innerHTML.indexOf("maxlength='80'")>=0,"自由入力欄");
+  closeChatPanel();
+  ok(R2.chatUnread===0,"開いたら未読リセット");
+  roomTeardown();
+  ok(R2.chat.length===0,"ルーム終了でチャット消去");
+
   console.log(failures===0?"===== CLIENT SMOKE OK =====":"===== "+failures+" FAILURES =====");
   process.exit(failures===0?0:1);
 }catch(e){

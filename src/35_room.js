@@ -8,7 +8,8 @@ var R2={peer:null,code:"",isHost:false,myPid:"",conns:{},hostConn:null,
   view:null,answered:false,cur:null,saveDone:false,
   leaving:false,lastMsgAt:0,reconnecting:false,attempts:0,migrating:false,
   seen:{},lastResults:null,lastEnd:null,dropTo:{},DROP_MS:10000,WD_MS:2000,
-  qlog:[],lastScores:[]};
+  qlog:[],lastScores:[],chat:[],chatUnread:0,chatLastSent:0,chatRate:{},chatSeq:0};
+var CHAT_OPEN=false;
 var PEER_PREFIX="wbtl-v3-";
 var PEER_CONFIG={config:{iceServers:[
   {urls:"stun:stun.l.google.com:19302"},
@@ -51,6 +52,8 @@ function roomTeardown(){
   R2.phase="idle";R2.view=null;R2.cur=null;R2.saveDone=false;R2.isHost=false;R2.answered=false;
   R2.reconnecting=false;R2.attempts=0;R2.lastResults=null;R2.lastEnd=null;R2.lastMsgAt=0;
   R2.migrating=false;R2.qlog=[];R2.lastScores=[];
+  R2.chat=[];R2.chatUnread=0;R2.chatRate={};CHAT_OPEN=false;
+  var __cp=document.querySelector("#chatPanel");if(__cp&&__cp.remove)__cp.remove();
   setNet("hide");
 }
 function activePlayers(){
@@ -188,6 +191,10 @@ function wireHostConn(conn){
     }
     if(msg.t==="answer"&&pidRef.pid){
       if(R2.phase==="question"&&+msg.qi===R2.qi)applyAnswer(pidRef.pid,+msg.choice);
+    }
+    if(msg.t==="chat"&&pidRef.pid){
+      var cp=R2.players[pidRef.pid];
+      if(cp)hostChatMsg(pidRef.pid,cp.name,String(msg.text||""));
     }
   });
 }
@@ -440,6 +447,11 @@ function wireGuestConn(conn){
       case "resume":
         handleResume(msg);
         break;
+      case "chat":
+        if(msg.pid===R2.myPid)break; /* 自分はローカル表示済み */
+        chatPush({pid:msg.pid,name:msg.name,text:msg.text,mine:false});
+        if(!CHAT_OPEN)toast("💬 "+msg.name+"："+msg.text);
+        break;
       case "rejected":
         toast(msg.reason||"参加できませんでした");roomTeardown();go("roomSetup");
         break;
@@ -658,6 +670,90 @@ function hostRematch(){
   R2.saveDone=false;R2.lastEnd=null;R2.lastResults=null;R2.answered=false;R2.qlog=[];
   R2.qi=0;
   roomStartGame();
+}
+
+/* ---------- チャット（定型文・自由入力） ---------- */
+var CHAT_TAUNTS=["おそっ！亀？","それ勉強した?","余裕ww","ざんね〜ん","追いつける?","かんたんすぎ✌","集中〜！","まだ回答してないの？"];
+var CHAT_NICE=["よろしく！","ナイス！","いいね！","あと1問！"];
+function chatPush(m){
+  R2.chat.push(m);
+  if(R2.chat.length>50)R2.chat.shift();
+  if(!CHAT_OPEN)R2.chatUnread++;
+  refreshChatLog();renderChatFab();
+}
+function chatBubble(m){
+  return "<div class='cmsg"+(m.mine?" mine":"")+"'>"+
+    (m.mine?"":"<small>"+esc(m.name)+"</small>")+
+    "<div class='ctext'>"+esc(m.text)+"</div></div>";
+}
+function refreshChatLog(){
+  var lg=document.querySelector("#chatLog");
+  if(lg)lg.innerHTML=R2.chat.map(chatBubble).join("");
+}
+function canChat(){
+  return !!R2.peer&&(R2.phase==="lobby"||R2.phase==="waiting-q"||R2.phase==="question"||R2.phase==="reveal"||R2.phase==="end");
+}
+function sendChat(text){
+  if(!canChat())return;
+  var t=String(text||"").trim().slice(0,80);if(!t)return;
+  var now=Date.now();
+  if(now-R2.chatLastSent<1200){toast("送信が早すぎます。少し待ってください");return;}
+  R2.chatLastSent=now;
+  if(R2.isHost)hostChatMsg(R2.myPid,me().name,t);
+  else if(R2.hostConn){try{R2.hostConn.send({t:"chat",text:t});}catch(e){}}
+}
+function hostChatMsg(pid,name,text){
+  if(!R2.isHost)return;
+  var t=String(text||"").trim().slice(0,80);if(!t)return;
+  var now=Date.now();
+  if(now-(R2.chatRate[pid]||0)<800)return; /* 1人0.8秒以下の連投は無視 */
+  R2.chatRate[pid]=now;
+  R2.chatSeq++;
+  hostBroadcast({t:"chat",id:R2.chatSeq,pid:pid,name:name,text:t});
+  chatPush({pid:pid,name:name,text:t,mine:pid===R2.myPid});
+}
+function renderChatFab(){
+  var el=document.querySelector("#chatFab");
+  if(!canChat()){if(el)el.style.display="none";return;}
+  if(!el){
+    el=document.createElement("button");el.id="chatFab";el.title="チャット";
+    el.onclick=function(){CHAT_OPEN?closeChatPanel():openChatPanel();};
+    document.body.appendChild(el);
+  }
+  el.style.display="grid";
+  el.innerHTML="💬"+(R2.chatUnread>0?"<span class='cbadge'>"+(R2.chatUnread>9?"9+":R2.chatUnread)+"</span>":"");
+}
+function openChatPanel(){
+  closeChatPanel();
+  CHAT_OPEN=true;R2.chatUnread=0;
+  var wrap=document.createElement("div");wrap.id="chatPanel";
+  wrap.innerHTML="<div class='sheet'>"+
+    "<div class='chead'><b>💬 チャット</b><button id='chatClose'>✕</button></div>"+
+    "<div id='chatLog'>"+R2.chat.map(chatBubble).join("")+"</div>"+
+    "<div class='chips'><span class='clbl'>煽り</span>"+
+    CHAT_TAUNTS.map(function(t){return "<button class='chip hot'>"+t+"</button>";}).join("")+
+    "<span class='clbl'>あいさつ</span>"+
+    CHAT_NICE.map(function(t){return "<button class='chip'>"+t+"</button>";}).join("")+
+    "</div>"+
+    "<div class='crow'><input type='text' id='chatInput' maxlength='80' placeholder='自由入力（80文字まで）'><button class='btn pri' id='chatSend'>送信</button></div>"+
+    "</div>";
+  document.body.appendChild(wrap);
+  refreshChatLog();
+  var inp=wrap.querySelector("#chatInput");
+  var send=function(){var v=inp.value;inp.value="";sendChat(v);};
+  wrap.querySelector("#chatClose").onclick=closeChatPanel;
+  wrap.querySelector("#chatSend").onclick=send;
+  if(inp&&inp.addEventListener)inp.addEventListener("keydown",function(ev){if(ev.key==="Enter")send();});
+  Array.prototype.forEach.call(wrap.querySelectorAll(".chip"),function(c){
+    c.onclick=function(){sendChat(c.textContent);};
+  });
+  renderChatFab();
+}
+function closeChatPanel(){
+  CHAT_OPEN=false;
+  var p=document.querySelector("#chatPanel");
+  if(p&&p.remove)p.remove();
+  renderChatFab();
 }
 
 /* ---------- 公開ルーム（テンプレ部屋 HAFY1〜5） ---------- */
