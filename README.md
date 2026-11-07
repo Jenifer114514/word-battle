@@ -1,5 +1,7 @@
 # 英単語バトル（WordBattle）— PeerJS P2P版
 
+🔗 **プレイURL**: https://jenifer114514.github.io/word-battle/ （GitHub Pages）
+
 鉄壁 改訂版の2,175語で、**PeerJS（P2P / WebRTC）**を使って別々の端末から同時対戦できる英単語4択クイズアプリです。
 
 ## 動作形態
