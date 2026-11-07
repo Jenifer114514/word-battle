@@ -797,7 +797,7 @@ function probeTemplateRooms(){ /* 公開ルームの人数をまとめて調査 
 }
 function templateEnter(code){ /* 空いていればホストになる、埋まっていれば参加 */
   var btn=$("#tpl-"+code);if(btn)btn.disabled=true;
-  R2.settings={count:RSET.count,dir:RSET.dir,lv:RSET.lv,limit:RSET.limit};
+  R2.settings={count:RSET.count,dir:RSET.dir,lv:"mix",limit:RSET.limit};
   roomCreateAt(code).then(function(r){
     if(r&&r.ok){go("roomLobby");return;}
     roomJoin(code,null).then(function(j){
@@ -855,7 +855,7 @@ function saveRoomRecord(end){
 }
 
 /* ---------- 画面: セットアップ ---------- */
-var RSET={count:10,dir:"mix",lv:"mix",limit:15};
+var RSET={count:10,dir:"mix",lv:"mix",limit:15}; /* lv は常に mix（全2,175語）に固定 */
 SCREENS.roomSetup=function(){
   var m=me();if(!m)return go("profiles");
   roomTeardown();
@@ -870,8 +870,6 @@ SCREENS.roomSetup=function(){
     "<label class='f'>問題数</label><div class='seg' id='rsCount'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='"+(RSET.count===n?"on":"")+"'>"+n+"問</button>";}).join("")+"</div>"+
     "<label class='f'>出題方向</label><div class='seg' id='rsDir'>"+
     [["ej","英語→日本語"],["je","日本語→英語"],["mix","ミックス"]].map(function(x){return "<button data-v='"+x[0]+"' class='"+(RSET.dir===x[0]?"on":"")+"'>"+x[1]+"</button>";}).join("")+"</div>"+
-    "<label class='f'>出題範囲</label><div class='seg' id='rsLv'>"+
-    [["1",LV_NAME[1]],["2",LV_NAME[2]],["3",LV_NAME[3]],["mix","ミックス"]].map(function(x){return "<button data-v='"+x[0]+"' class='"+(RSET.lv===x[0]?"on":"")+"'>"+x[1]+"</button>";}).join("")+"</div>"+
     "<label class='f'>制限時間</label><div class='seg' id='rsLimit'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='"+(RSET.limit===n?"on":"")+"'>"+n+"秒</button>";}).join("")+"</div>"+
     "<button class='btn pri block mt' id='rsCreate'>ルームを作成する</button></div>";
   html+="<div class='card'><h2>📢 公開ルーム</h2><div id='tplList'>"+
@@ -889,7 +887,7 @@ SCREENS.roomSetup=function(){
   app.innerHTML=html;
   function seg(id,key,cast){var el=$("#"+id,app);$$("button",el).forEach(function(b){
     b.onclick=function(){RSET[key]=cast?cast(b.getAttribute("data-v")):b.getAttribute("data-v");SCREENS.roomSetup();};});}
-  seg("rsCount","count",Number);seg("rsDir","dir");seg("rsLv","lv");seg("rsLimit","limit",Number);
+  seg("rsCount","count",Number);seg("rsDir","dir");seg("rsLimit","limit",Number);
   $("#rsBack",app).onclick=function(){go("home");};
   $$("#tplList .rk",app).forEach(function(b){
     b.onclick=function(){templateEnter(b.getAttribute("data-code"));};
@@ -898,7 +896,7 @@ SCREENS.roomSetup=function(){
   probeTemplateRooms();
   $("#rsCreate",app).onclick=function(){
     var btn=$("#rsCreate",app);btn.disabled=true;btn.textContent="接続中…";
-    R2.settings={count:RSET.count,dir:RSET.dir,lv:RSET.lv,limit:RSET.limit};
+    R2.settings={count:RSET.count,dir:RSET.dir,lv:"mix",limit:RSET.limit};
     roomCreate().then(function(r){
       if(r.error){btn.disabled=false;btn.textContent="ルームを作成する";return toast(r.error);}
       go("roomLobby");
@@ -945,7 +943,7 @@ function renderLobby(){
   app.innerHTML=html;
   if(isHost){
     if($("#rlStart",app))$("#rlStart",app).onclick=function(){
-      R2.settings={count:RSET.count,dir:RSET.dir,lv:RSET.lv,limit:RSET.limit};
+      R2.settings={count:RSET.count,dir:RSET.dir,lv:"mix",limit:RSET.limit};
       roomStartGame();
     };
     if($("#rlEdit",app))$("#rlEdit",app).onclick=function(){go("roomSetup");};
