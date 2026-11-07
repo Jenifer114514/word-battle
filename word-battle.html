@@ -2676,10 +2676,13 @@ SCREENS.battleResult=function(params){
       "<td class='num'>"+secf(qd.timeMs)+"</td><td class='num'>"+qd.point+"</td></tr>";
   });
   html+="</table></div></div>"+
+    (typeof R2!=="undefined"&&R2.phase==="end"&&R2.isHost&&R2.peer?"<div class='card'><button class='btn pk block' id='rematchBtn'>🔄 もう一度対戦（同じメンバーで）</button></div>":"")+
     "<div class='rowbtns'><button class='btn pri' id='again' style='flex:1'>🌐 新しいルームを作る</button><button class='btn ghost' id='home' style='flex:1'>ホームへ</button></div>";
   app.innerHTML=html;
   $("#again",app).onclick=function(){go("roomSetup");};
   $("#home",app).onclick=function(){go("home");};
+  var rb=$("#rematchBtn",app);
+  if(rb)rb.onclick=function(){rb.disabled=true;rb.textContent="再戦を開始中…";hostRematch();};
 };
 /* ================= ルーム対戦（PeerJS・P2Pで別々の端末と同時対戦） =================
    ホストが問題を管理。切断時はゲストが自動再接続（途中復帰つき）。
@@ -2753,38 +2756,46 @@ function scoreSnapshot(){
 
 /* ---------- ホスト: ルーム作成 ---------- */
 function roomCreate(){
+  var attempt=0;
+  function tryCreate(){
+    var code="";for(var i=0;i<4;i++)code+=CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
+    return roomCreateAt(code).then(function(r){
+      if(r&&r.taken&&attempt<5){attempt++;return tryCreate();}
+      if(r&&r.taken)return {error:"ルームを作成できませんでした。もう一度お試しください"};
+      return r;
+    });
+  }
+  return tryCreate();
+}
+function roomCreateAt(code){ /* 固定コードでルーム作成（テンプレ部屋用） */
   var m=me();
   return new Promise(function(resolve){
-    var attempt=0;
-    function tryCreate(){
-      var code="";for(var i=0;i<4;i++)code+=CODE_CHARS[Math.floor(Math.random()*CODE_CHARS.length)];
-      var peer;
-      try{peer=new Peer(PEER_PREFIX+code,PEER_CONFIG);}catch(e){return resolve({error:"PeerJSを初期化できません: "+e.message});}
-      var settled=false;
-      var to=setTimeout(function(){if(!settled){settled=true;try{peer.destroy();}catch(e){}resolve({error:"接続に時間がかかりすぎます。ネットワークを確認してください"});}},12000);
-      peer.on("open",function(){
-        if(settled){try{peer.destroy();}catch(e){}return;}
-        settled=true;clearTimeout(to);
-        R2.peer=peer;R2.code=code;R2.isHost=true;R2.myPid="h";
-        R2.players={};R2.order=[];
-        R2.players.h={id:"h",name:m.name,color:m.color,host:true,points:0,left:false,answers:{}};
-        R2.order.push("h");
-        R2.phase="lobby";
-        peer.on("connection",function(conn){wireHostConn(conn);});
-        peer.on("error",function(e){hostPeerError(e);});
-        R2.leaving=false;
-        startHostLiveness();
-        setNet("ok");
-        resolve({ok:true,code:code});
-      });
-      peer.on("error",function(e){
-        if(settled)return;
-        if(e&&e.type==="unavailable-id"&&attempt<5){attempt++;try{peer.destroy();}catch(e2){}tryCreate();return;}
-        settled=true;clearTimeout(to);
-        resolve({error:peerErrMsg(e)});
-      });
-    }
-    tryCreate();
+    var peer;
+    try{peer=new Peer(PEER_PREFIX+code,PEER_CONFIG);}catch(e){return resolve({error:"PeerJSを初期化できません: "+e.message});}
+    var settled=false;
+    var to=setTimeout(function(){if(!settled){settled=true;try{peer.destroy();}catch(e){}resolve({error:"接続に時間がかかりすぎます。ネットワークを確認してください"});}},12000);
+    peer.on("open",function(){
+      if(settled){try{peer.destroy();}catch(e){}return;}
+      settled=true;clearTimeout(to);
+      R2.peer=peer;R2.code=code;R2.isHost=true;R2.myPid="h";
+      R2.players={};R2.order=[];
+      R2.players.h={id:"h",name:m.name,color:m.color,host:true,points:0,left:false,answers:{}};
+      R2.order.push("h");
+      R2.phase="lobby";
+      peer.on("connection",function(conn){wireHostConn(conn);});
+      peer.on("error",function(e){hostPeerError(e);});
+      R2.leaving=false;
+      startHostLiveness();
+      setNet("ok");
+      resolve({ok:true,code:code});
+    });
+    peer.on("error",function(e){
+      if(settled)return;
+      settled=true;clearTimeout(to);
+      try{peer.destroy();}catch(e2){}
+      if(e&&e.type==="unavailable-id")return resolve({taken:true});
+      resolve({error:peerErrMsg(e)});
+    });
   });
 }
 function peerErrMsg(e){
@@ -2808,6 +2819,12 @@ function wireHostConn(conn){
       }
     }
     if(msg.t==="hb"){try{conn.send({t:"hb"});}catch(e){}return;}
+    if(msg.t==="count"){ /* 公開ルームの人数調査 */
+      var cn=R2.phase==="end"?0:activePlayers().length;
+      try{conn.send({t:"count",n:cn,phase:R2.phase});}catch(e){}
+      setTimeout(function(){try{conn.close();}catch(e){}},300);
+      return;
+    }
     if(msg.t==="hello"){
       var name=String(msg.name||"").trim().slice(0,12)||"Guest";
       if(R2.phase==="end"){
@@ -3025,7 +3042,7 @@ function endGame(){
 /* ---------- ゲスト ---------- */
 function roomJoin(code,rejoin){
   return new Promise(function(resolve){
-    if(!/^[A-Z0-9]{4}$/.test(code))return resolve({error:"4桁のルームコードを入力してください"});
+    if(!/^[A-Z0-9]{4,5}$/.test(code))return resolve({error:"4〜5桁のルームコードを入力してください"});
     var m=me();var peer;
     try{peer=new Peer(PEER_CONFIG);}catch(e){return resolve({error:"PeerJSを初期化できません: "+e.message});}
     var settled=false;
@@ -3082,6 +3099,8 @@ function wireGuestConn(conn){
         if(route.name==="roomLobby")renderLobby();
         break;
       case "start":
+        R2.saveDone=false;
+        if(R2.tEnd){clearTimeout(R2.tEnd);R2.tEnd=null;}
         R2.settings=msg.settings;R2.total=msg.total;R2.qi=-1;R2.phase="waiting-q";
         R2.qlog=[];R2.lastScores=(R2.order||[]).map(function(pid){var p=R2.players[pid];return {id:pid,points:p?p.points:0};});
         go("roomBattle");
@@ -3112,17 +3131,21 @@ function wireGuestConn(conn){
         break;
       case "end":
         if(!R2.saveDone){R2.saveDone=true;saveRoomRecord(msg);}
-        roomTeardown();
+        R2.lastEnd=msg;
+        if(R2.tEnd)clearTimeout(R2.tEnd);
+        R2.tEnd=setTimeout(function(){roomTeardown();},60000); /* 再戦を1分だけ待機 */
         break;
     }
   });
   conn.on("close",function(){
     if(R2.leaving||!R2.peer)return;
+    if(R2.phase==="end"){roomTeardown();return;} /* 終了後の切断は静かに退出 */
     setNet("r");
     guestReconnect();
   });
   conn.on("error",function(){
     if(R2.leaving||!R2.peer)return;
+    if(R2.phase==="end"){roomTeardown();return;}
     setNet("r");
     guestReconnect();
   });
@@ -3312,6 +3335,69 @@ function becomeHost(peer){
   }
 }
 
+/* ---------- 再戦（ホスト: 同じメンバーでもう一度） ---------- */
+function hostRematch(){
+  if(!R2.isHost||R2.phase!=="end"||!R2.peer)return;
+  if(R2.tEnd){clearTimeout(R2.tEnd);R2.tEnd=null;}
+  R2.order=R2.order.filter(function(pid){var p=R2.players[pid];return p&&!p.left;});
+  R2.order.forEach(function(pid){var p=R2.players[pid];p.points=0;p.answers={};p.left=false;p.rank=0;});
+  R2.saveDone=false;R2.lastEnd=null;R2.lastResults=null;R2.answered=false;R2.qlog=[];
+  R2.qi=0;
+  roomStartGame();
+}
+
+/* ---------- 公開ルーム（テンプレ部屋 HAFY1〜5） ---------- */
+var TPL_ROOMS=["HAFY1","HAFY2","HAFY3","HAFY4","HAFY5"];
+var __tplStatus={};
+var probePeer=null,probeSeq=0;
+function tplMark(code,m){ /* 表示を更新（_tplStatus はテスト用ミラー） */
+  var s=$("#tpls-"+code);
+  var t=(typeof m==="string")?m:null;
+  if(t){__tplStatus[code]=t;if(s)s.textContent=t;return;}
+  if(!m||m.n<=0||m.phase==="end"){__tplStatus[code]="空き";if(s)s.textContent="空き";return;}
+  __tplStatus[code]=m.n+"人"+(m.phase==="lobby"?"（待機中）":"（対戦中）");
+  if(s)s.textContent=__tplStatus[code];
+}
+function probeTemplateRooms(){ /* 公開ルームの人数をまとめて調査 */
+  var seq=++probeSeq;
+  if(probePeer){try{probePeer.destroy();}catch(e){}probePeer=null;}
+  TPL_ROOMS.forEach(function(c){__tplStatus[c]="調査中…";var el=$("#tpls-"+c);if(el)el.textContent="調査中…";});
+  if(typeof Peer==="undefined")return;
+  var p;
+  try{p=new Peer(PEER_CONFIG);}catch(e){return;}
+  probePeer=p;
+  p.on("open",function(){
+    if(seq!==probeSeq){try{p.destroy();}catch(e){}return;}
+    TPL_ROOMS.forEach(function(code){
+      var conn;
+      try{conn=p.connect(PEER_PREFIX+code,{reliable:true});}catch(e){return;}
+      var to=setTimeout(function(){tplMark(code,"空き");try{conn.close();}catch(e){}},4500);
+      conn.on("open",function(){try{conn.send({t:"count"});}catch(e){}});
+      conn.on("data",function(m){if(m&&m.t==="count"){clearTimeout(to);tplMark(code,m);try{conn.close();}catch(e){}}});
+      conn.on("error",function(){});
+    });
+  });
+  p.on("error",function(e){
+    if(e&&e.type==="peer-unavailable"){
+      var mm=(e&&e.message)||"";
+      TPL_ROOMS.forEach(function(code){if(!mm||mm.indexOf(code)>=0)tplMark(code,"空き");});
+    }
+  });
+  setTimeout(function(){if(probePeer===p){try{p.destroy();}catch(e){}}},6000);
+}
+function templateEnter(code){ /* 空いていればホストになる、埋まっていれば参加 */
+  var btn=$("#tpl-"+code);if(btn)btn.disabled=true;
+  R2.settings={count:RSET.count,dir:RSET.dir,lv:RSET.lv,limit:RSET.limit};
+  roomCreateAt(code).then(function(r){
+    if(r&&r.ok){go("roomLobby");return;}
+    roomJoin(code,null).then(function(j){
+      var btn2=$("#tpl-"+code);
+      if(j.error){if(btn2)btn2.disabled=false;return toast(j.error);}
+      go("roomLobby");
+    });
+  });
+}
+
 /* ---------- 回答送信 ---------- */
 function roomAnswer(choice){
   if(R2.answered)return;
@@ -3367,7 +3453,7 @@ SCREENS.roomSetup=function(){
     app.innerHTML="<div class='card'><h2>🌐 ルームで対戦</h2><div class='notice'>PeerJSを読み込めませんでした。インターネット接続を確認してページを再読み込みしてください。</div></div><div class='rowbtns'><button class='btn ghost block' id='rsBack'>ホームへ</button></div>";
     $("#rsBack",app).onclick=function(){go("home");};return;
   }
-  var preCode="";try{var u=new URLSearchParams(location.search);preCode=(u.get("room")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,4);}catch(e){}
+  var preCode="";try{var u=new URLSearchParams(location.search);preCode=(u.get("room")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5);}catch(e){}
   var html="<div class='card'><h2>🌐 ルームで対戦</h2>"+
     "<div class='check' style='cursor:default'>"+avatarHtml(m.id,m.name)+esc(m.name)+"<span class='badge b-ok'>あなた</span></div></div>";
   html+="<div class='card'><h2>🏠 ルームを作る（ホスト）</h2>"+
@@ -3378,8 +3464,16 @@ SCREENS.roomSetup=function(){
     [["1",LV_NAME[1]],["2",LV_NAME[2]],["3",LV_NAME[3]],["mix","ミックス"]].map(function(x){return "<button data-v='"+x[0]+"' class='"+(RSET.lv===x[0]?"on":"")+"'>"+x[1]+"</button>";}).join("")+"</div>"+
     "<label class='f'>制限時間</label><div class='seg' id='rsLimit'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='"+(RSET.limit===n?"on":"")+"'>"+n+"秒</button>";}).join("")+"</div>"+
     "<button class='btn pri block mt' id='rsCreate'>ルームを作成する</button></div>";
+  html+="<div class='card'><h2>📢 公開ルーム</h2><div id='tplList'>"+
+    TPL_ROOMS.map(function(c){
+      return "<button class='rk' id='tpl-"+c+"' data-code='"+c+"'>"+
+        avatarHtml("srv:"+c,c)+
+        "<div class='nm'><b>"+c+"</b><small id='tpls-"+c+"'>調査中…</small></div>"+
+        "<div class='pt'><span class='badge b-info'>入る</span></div></button>";
+    }).join("")+"</div>"+
+    "<button class='btn ghost block mt' id='tplRefresh'>🔄 更新</button></div>";
   html+="<div class='card'><h2>🔑 ルームに参加</h2>"+
-    "<label class='f'>4桁のルームコード</label><input type='text' id='rsCode' maxlength='4' placeholder='例：7K2M' autocapitalize='characters' value='"+esc(preCode)+"'>"+
+    "<label class='f'>ルームコード（4〜5桁）</label><input type='text' id='rsCode' maxlength='5' placeholder='例：7K2M' autocapitalize='characters' value='"+esc(preCode)+"'>"+
     "<button class='btn pk block mt' id='rsJoin'>参加する</button></div>"+
     "<div class='rowbtns'><button class='btn ghost block' id='rsBack'>ホームへ</button></div>";
   app.innerHTML=html;
@@ -3387,6 +3481,11 @@ SCREENS.roomSetup=function(){
     b.onclick=function(){RSET[key]=cast?cast(b.getAttribute("data-v")):b.getAttribute("data-v");SCREENS.roomSetup();};});}
   seg("rsCount","count",Number);seg("rsDir","dir");seg("rsLv","lv");seg("rsLimit","limit",Number);
   $("#rsBack",app).onclick=function(){go("home");};
+  $$("#tplList .rk",app).forEach(function(b){
+    b.onclick=function(){templateEnter(b.getAttribute("data-code"));};
+  });
+  $("#tplRefresh",app).onclick=function(){probeTemplateRooms();};
+  probeTemplateRooms();
   $("#rsCreate",app).onclick=function(){
     var btn=$("#rsCreate",app);btn.disabled=true;btn.textContent="接続中…";
     R2.settings={count:RSET.count,dir:RSET.dir,lv:RSET.lv,limit:RSET.limit};
@@ -3397,7 +3496,7 @@ SCREENS.roomSetup=function(){
   };
   $("#rsJoin",app).onclick=function(){
     var code=$("#rsCode",app).value.toUpperCase().replace(/[^A-Z0-9]/g,"");
-    if(code.length!==4)return toast("4桁のルームコードを入力してください");
+    if(!/^[A-Z0-9]{4,5}$/.test(code))return toast("4〜5桁のルームコードを入力してください");
     var btn=$("#rsJoin",app);btn.disabled=true;btn.textContent="接続中…";
     roomJoin(code,null).then(function(r){
       if(r.error){btn.disabled=false;btn.textContent="参加する";return toast(r.error);}

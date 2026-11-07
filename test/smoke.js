@@ -547,6 +547,94 @@ try{
   ok(!!bHello&&bHello.t==="hello"&&bHello.rejoin===true&&bHello.prevPid==="gY","rejoin要求を送信");
   roomTeardown();
 
+  section("再戦（同じメンバーでもう一度）");
+  FakePeer.reset();
+  R2.WD_MS=60000;R2.DROP_MS=10000;R2.REVEAL_MS=80;
+  R2.settings={count:1,dir:"mix",lv:"mix",limit:3};
+  var hcR=await roomCreate();
+  ok(hcR.ok,"ルーム作成");
+  var gR=new FakeConn("gR"),hR=new FakeConn("hR");
+  gR.link(hR);
+  var gRmsg=[];
+  gR.on("data",function(m){gRmsg.push(m.t);});
+  R2.peer._emit("connection",hR);
+  gR.open=true;hR.open=true;gR._emit("open");hR._emit("open");
+  await sleep(20);
+  hR._emit("data",{t:"hello",name:"再戦子",color:"#f0f"});
+  await sleep(20);
+  var gpR=R2.order.find(function(x){return x!=="h";});
+  roomStartGame();
+  await sleep(20);
+  roomAnswer(0);
+  hR._emit("data",{t:"answer",qi:0,choice:1});
+  await sleep(600);
+  ok(R2.phase==="end","1回目終了");
+  ok(app.innerHTML.indexOf("id='rematchBtn'")>=0,"結果画面に再戦ボタン（ホストのみ）");
+  var b0=me().battles.length;
+  var starts1=gRmsg.filter(function(t){return t==="start";}).length;
+  hostRematch();
+  await sleep(30);
+  ok(R2.phase==="question"&&R2.qi===0,"再戦で即第1問");
+  ok(R2.players[gpR].points===0&&R2.players.h.points===0,"スコアリセット");
+  ok(R2.saveDone===false,"記録フラグリセット（再戦の結果も保存される）");
+  ok(gRmsg.filter(function(t){return t==="start";}).length===starts1+1,"全員にstart再送");
+  roomAnswer(1);
+  hR._emit("data",{t:"answer",qi:0,choice:0});
+  await sleep(700);
+  ok(R2.phase==="end","再戦終了");
+  ok(me().battles.length===b0+1,"再戦の記録も保存");
+  ok(gRmsg.filter(function(t){return t==="end";}).length===2,"全員にend再送");
+  var ends=gRmsg.filter(function(t){return t==="end";}).length;
+  roomTeardown();
+
+  section("公開ルーム（テンプレ部屋 HAFY1〜5）");
+  ok(TPL_ROOMS.join()==="HAFY1,HAFY2,HAFY3,HAFY4,HAFY5","テンプレコード定義");
+  SCREENS.roomSetup();
+  ok([1,2,3,4,5].every(function(n){return app.innerHTML.indexOf("HAFY"+n)>=0;}),"セットアップ画面に5部屋表示");
+  ok(app.innerHTML.indexOf("4〜5桁")>=0&&app.innerHTML.indexOf("maxlength='5'")>=0,"コード入力は4〜5桁");
+  var er3=await roomJoin("ABC");
+  ok(!!er3.error&&er3.error.indexOf("4〜5桁")>=0,"3桁はエラー");
+  /* HAFY2 をホストが開店 → プローブで人数表示 */
+  R2.settings={count:5,dir:"mix",lv:"mix",limit:10};
+  var hcT=await roomCreateAt("HAFY2");
+  ok(hcT.ok,"HAFY2を開店（固定コードでルーム作成）");
+  ok(R2.code==="HAFY2","コードがHAFY2");
+  var gT2=new FakeConn("gT2"),hT2=new FakeConn("hT2");
+  gT2.link(hT2);gT2.open=true;hT2.open=true;
+  R2.peer._emit("connection",hT2);
+  await sleep(20);
+  hT2._emit("data",{t:"hello",name:"客",color:"#00f"});
+  await sleep(20);
+  ok(R2.order.length===2,"客が入店");
+  /* count プローブ応答 */
+  var pC=new FakeConn("pC"),hC2=new FakeConn("hC2");
+  pC.link(hC2);pC.open=true;hC2.open=true;
+  R2.peer._emit("connection",hC2);
+  await sleep(20);
+  var cnt=null;
+  pC.on("data",function(m){if(m.t==="count")cnt=m;});
+  hC2._emit("data",{t:"count"});
+  await sleep(20);
+  ok(!!cnt&&cnt.n===2&&cnt.phase==="lobby","人数調査に2人・待機中で応答");
+  /* プローブ一括調査: HAFY2=1人表示, 他は空き */
+  FakePeer.reset(); /* HAFY2ホストをregistryから消すと接続切れるので別の方法で */
+  roomTeardown();
+  FakePeer.reset();
+  var hcT2=await roomCreateAt("HAFY2");
+  ok(hcT2.ok,"HAFY2を再開店");
+  probeTemplateRooms();
+  await sleep(300);
+  ok(__tplStatus.HAFY2==="1人（待機中）","プローブ: HAFY2=1人（待機中）: "+__tplStatus.HAFY2);
+  ok(__tplStatus.HAFY1==="空き"&&__tplStatus.HAFY3==="空き","プローブ: 空室は「空き」");
+  /* 既存ホストがあるコードは taken → 参加に切り替わる */
+  var taken=null;
+  R2.settings=null;
+  var mhT=new FakePeer("wbtl-v3-HAFY4"); /* 他人がHAFY4を先に開店 */
+  var tEnterDone=false;
+  var hcT4=await roomCreateAt("HAFY4");
+  ok(hcT4.taken===true,"既存ルームあり→taken");
+  roomTeardown();
+
   console.log(failures===0?"===== CLIENT SMOKE OK =====":"===== "+failures+" FAILURES =====");
   process.exit(failures===0?0:1);
 }catch(e){

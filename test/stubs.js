@@ -44,7 +44,7 @@ FakePeer.prototype.connect=function(target){
   var conn=new FakeConn("guest");
   var host=FakePeer.registry[target];
   fakeTimers.push(setTimeout(function(){
-    if(!host||host.destroyed){guest._emit("error",{type:"peer-unavailable"});return;}
+    if(!host||host.destroyed){guest._emit("error",{type:"peer-unavailable",message:"Could not connect to peer: "+target});return;}
     var hostConn=new FakeConn("host");
     conn.link(hostConn);
     host._emit("connection",hostConn);

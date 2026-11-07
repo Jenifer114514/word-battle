@@ -26,8 +26,11 @@ SCREENS.battleResult=function(params){
       "<td class='num'>"+secf(qd.timeMs)+"</td><td class='num'>"+qd.point+"</td></tr>";
   });
   html+="</table></div></div>"+
+    (typeof R2!=="undefined"&&R2.phase==="end"&&R2.isHost&&R2.peer?"<div class='card'><button class='btn pk block' id='rematchBtn'>🔄 もう一度対戦（同じメンバーで）</button></div>":"")+
     "<div class='rowbtns'><button class='btn pri' id='again' style='flex:1'>🌐 新しいルームを作る</button><button class='btn ghost' id='home' style='flex:1'>ホームへ</button></div>";
   app.innerHTML=html;
   $("#again",app).onclick=function(){go("roomSetup");};
   $("#home",app).onclick=function(){go("home");};
+  var rb=$("#rematchBtn",app);
+  if(rb)rb.onclick=function(){rb.disabled=true;rb.textContent="再戦を開始中…";hostRematch();};
 };
