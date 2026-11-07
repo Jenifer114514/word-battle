@@ -636,7 +636,7 @@ try{
   roomTeardown();
 
   section("チャット（定型文・自由入力）");
-  ok(CHAT_TAUNTS.indexOf("余裕ww")>=0&&CHAT_TAUNTS.length>=8,"煽り定型文を用意");
+  ok(CHAT_TAUNTS.indexOf("こんなの簡単だよ～")>=0&&CHAT_TAUNTS.indexOf("うお(笑)")>=0&&CHAT_TAUNTS.indexOf("どいつもこいつもバカにしやがって💢💢")>=0,"煽り定型文を用意（新テンプレ3種含む）");
   ok(CHAT_NICE.indexOf("よろしく！")>=0,"あいさつ定型文を用意");
   FakePeer.reset();
   R2.WD_MS=60000;R2.DROP_MS=10000;R2.REVEAL_MS=80;
@@ -694,7 +694,7 @@ try{
   openChatPanel();
   var bodyKids=document.body.children;
   var panel=bodyKids[bodyKids.length-1];
-  ok(panel.innerHTML.indexOf("余裕ww")>=0&&panel.innerHTML.indexOf("煽り")>=0,"定型文チップを表示");
+  ok(panel.innerHTML.indexOf("うお(笑)")>=0&&panel.innerHTML.indexOf("煽り")>=0,"定型文チップを表示");
   ok(panel.innerHTML.indexOf("自由入力")>=0&&panel.innerHTML.indexOf("maxlength='80'")>=0,"自由入力欄");
   closeChatPanel();
   ok(R2.chatUnread===0,"開いたら未読リセット");
