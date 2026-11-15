@@ -10,12 +10,12 @@ SCREENS.account=function(){
     "<div class='sub'>🔒 記録はこの端末に保存されています</div></div>"+
     "<label class='f'>ユーザー名"+(canRename?"（変更できます）":"（次の変更は "+nextDay+" 以降）")+"</label>"+
     "<input type='text' id='acName' maxlength='12' value='"+esc(m.name)+"'"+(canRename?"":" disabled")+">"+
-    "<label class='f'>アイコン色</label><div class='seg' id='acColor'>"+COLORS.map(function(c){return "<button data-v='"+c+"' style='"+(m.color===c?"border-color:"+c+";background:"+c+"22":"")+"'><span style='display:inline-block;width:18px;height:18px;border-radius:50%;background:"+c+"'></span></button>";}).join("")+"</div>"+
-    "<button class='btn pri block mt' id='acSave'>保存する</button>"+
-    "<hr class='divh'><div class='rowbtns'><button class='btn danger' id='acReset' style='flex:1'>🗑 戦績・統計をリセット</button></div>"+
+    "<label class='f'>アイコン色</label><div class='join' id='acColor'>"+COLORS.map(function(c){return "<button class='btn join-item' data-v='"+c+"' style='"+(m.color===c?"border-color:"+c+";background:"+c+"22":"")+"'><span style='display:inline-block;width:18px;height:18px;border-radius:50%;background:"+c+"'></span></button>";}).join("")+"</div>"+
+    "<button class='btn btn-primary w-full mt-3' id='acSave'>保存する</button>"+
+    "<hr class='divh'><div class='rowbtns'><button class='btn btn-error' id='acReset' style='flex:1'>🗑 戦績・統計をリセット</button></div>"+
     "<div class='sub' style='margin-top:6px'>この端末に保存された対戦履歴・単語別統計を全消去します（元に戻せません）。</div>"+
-    "<hr class='divh'><div class='rowbtns'><button class='btn danger' id='acDel' style='flex:1'>"+(m.guest?"⚠ ゲストセッションを終了":"⚠ この端末からアカウントを削除")+"</button></div>"+
-    "</div><div class='rowbtns'><button class='btn ghost block' id='acBack'>ホームへ</button></div>";
+    "<hr class='divh'><div class='rowbtns'><button class='btn btn-error' id='acDel' style='flex:1'>"+(m.guest?"⚠ ゲストセッションを終了":"⚠ この端末からアカウントを削除")+"</button></div>"+
+    "</div><div class='rowbtns'><button class='btn btn-ghost w-full' id='acBack'>ホームへ</button></div>";
   app.innerHTML=html;
   var newColor=m.color;
   $$("#acColor button",app).forEach(function(b){b.onclick=function(){newColor=b.getAttribute("data-v");$$("#acColor button",app).forEach(function(x){x.style.background=x===b?newColor+"22":"";x.style.borderColor=x===b?newColor:"";});};});

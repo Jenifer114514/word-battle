@@ -43,8 +43,9 @@
 - ホストがオーソリティ：問題生成・採点・進行を担当。ゲストに正解は事前送信しない
 
 ## 開発
-- `src/` … クライアント（head/CSS、PeerJS同梱、単語、コア、結果、ルームP2P、統計、プロフィール）
-- `build.sh` … 連結して `word-battle.html` を再生成
+- `src/` … クライアント（head/CSS、**Tailwind+DaisyUIコンパイル済みCSS**、PeerJS同梱、単語、コア、結果、ルームP2P、統計、プロフィール）
+- CSSは **DaisyUI**（btn/badge/join/tabs/table等）+ ゲーム固有のカスタムCSS。UI変更時は `npm i && npm run css` で `src/03_tailwind.css` を再生成
+- `build.sh` … 連結して `word-battle.html` を再生成（npm不要・コンパイル済みCSSを同梱）
 - `server.js` … 静的配信のみ（LIVE PREVIEW / LAN共有用）
 - `test/smoke.js` … クライアント＋PeerJSモックによるP2Pフローテスト / `test/server_test.js` … 配信テスト
 

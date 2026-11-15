@@ -735,7 +735,7 @@ function openChatPanel(){
     "<span class='clbl'>あいさつ</span>"+
     CHAT_NICE.map(function(t){return "<button class='chip'>"+t+"</button>";}).join("")+
     "</div>"+
-    "<div class='crow'><input type='text' id='chatInput' maxlength='80' placeholder='自由入力（80文字まで）'><button class='btn pri' id='chatSend'>送信</button></div>"+
+    "<div class='crow'><input type='text' id='chatInput' maxlength='80' placeholder='自由入力（80文字まで）'><button class='btn btn-primary' id='chatSend'>送信</button></div>"+
     "</div>";
   document.body.appendChild(wrap);
   refreshChatLog();
@@ -860,30 +860,30 @@ SCREENS.roomSetup=function(){
   var m=me();if(!m)return go("profiles");
   roomTeardown();
   if(typeof Peer==="undefined"){
-    app.innerHTML="<div class='card'><h2>🌐 ルームで対戦</h2><div class='notice'>PeerJSを読み込めませんでした。インターネット接続を確認してページを再読み込みしてください。</div></div><div class='rowbtns'><button class='btn ghost block' id='rsBack'>ホームへ</button></div>";
+    app.innerHTML="<div class='card'><h2>🌐 ルームで対戦</h2><div class='alert alert-info'>PeerJSを読み込めませんでした。インターネット接続を確認してページを再読み込みしてください。</div></div><div class='rowbtns'><button class='btn btn-ghost w-full' id='rsBack'>ホームへ</button></div>";
     $("#rsBack",app).onclick=function(){go("home");};return;
   }
   var preCode="";try{var u=new URLSearchParams(location.search);preCode=(u.get("room")||"").toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5);}catch(e){}
   var html="<div class='card'><h2>🌐 ルームで対戦</h2>"+
-    "<div class='check' style='cursor:default'>"+avatarHtml(m.id,m.name)+esc(m.name)+"<span class='badge b-ok'>あなた</span></div></div>";
+    "<div class='check' style='cursor:default'>"+avatarHtml(m.id,m.name)+esc(m.name)+"<span class='badge badge-success'>あなた</span></div></div>";
   html+="<div class='card'><h2>🏠 ルームを作る（ホスト）</h2>"+
-    "<label class='f'>問題数</label><div class='seg' id='rsCount'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='"+(RSET.count===n?"on":"")+"'>"+n+"問</button>";}).join("")+"</div>"+
-    "<label class='f'>出題方向</label><div class='seg' id='rsDir'>"+
-    [["ej","英語→日本語"],["je","日本語→英語"],["mix","ミックス"]].map(function(x){return "<button data-v='"+x[0]+"' class='"+(RSET.dir===x[0]?"on":"")+"'>"+x[1]+"</button>";}).join("")+"</div>"+
-    "<label class='f'>制限時間</label><div class='seg' id='rsLimit'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='"+(RSET.limit===n?"on":"")+"'>"+n+"秒</button>";}).join("")+"</div>"+
-    "<button class='btn pri block mt' id='rsCreate'>ルームを作成する</button></div>";
+    "<label class='f'>問題数</label><div class='join' id='rsCount'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='btn join-item "+(RSET.count===n?"btn-primary":"btn-ghost")+"'>"+n+"問</button>";}).join("")+"</div>"+
+    "<label class='f'>出題方向</label><div class='join' id='rsDir'>"+
+    [["ej","英語→日本語"],["je","日本語→英語"],["mix","ミックス"]].map(function(x){return "<button data-v='"+x[0]+"' class='btn join-item "+(RSET.dir===x[0]?"btn-primary":"btn-ghost")+"'>"+x[1]+"</button>";}).join("")+"</div>"+
+    "<label class='f'>制限時間</label><div class='join' id='rsLimit'>"+[5,10,15,20].map(function(n){return "<button data-v='"+n+"' class='btn join-item "+(RSET.limit===n?"btn-primary":"btn-ghost")+"'>"+n+"秒</button>";}).join("")+"</div>"+
+    "<button class='btn btn-primary w-full mt-3' id='rsCreate'>ルームを作成する</button></div>";
   html+="<div class='card'><h2>📢 公開ルーム</h2><div id='tplList'>"+
     TPL_ROOMS.map(function(c){
       return "<button class='rk' id='tpl-"+c+"' data-code='"+c+"'>"+
         avatarHtml("srv:"+c,c)+
         "<div class='nm'><b>"+c+"</b><small id='tpls-"+c+"'>調査中…</small></div>"+
-        "<div class='pt'><span class='badge b-info'>入る</span></div></button>";
+        "<div class='pt'><span class='badge badge-info'>入る</span></div></button>";
     }).join("")+"</div>"+
-    "<button class='btn ghost block mt' id='tplRefresh'>🔄 更新</button></div>";
+    "<button class='btn btn-ghost w-full mt-3' id='tplRefresh'>🔄 更新</button></div>";
   html+="<div class='card'><h2>🔑 ルームに参加</h2>"+
     "<label class='f'>ルームコード（4〜5桁）</label><input type='text' id='rsCode' maxlength='5' placeholder='例：7K2M' autocapitalize='characters' value='"+esc(preCode)+"'>"+
-    "<button class='btn pk block mt' id='rsJoin'>参加する</button></div>"+
-    "<div class='rowbtns'><button class='btn ghost block' id='rsBack'>ホームへ</button></div>";
+    "<button class='btn btn-secondary w-full mt-3' id='rsJoin'>参加する</button></div>"+
+    "<div class='rowbtns'><button class='btn btn-ghost w-full' id='rsBack'>ホームへ</button></div>";
   app.innerHTML=html;
   function seg(id,key,cast){var el=$("#"+id,app);$$("button",el).forEach(function(b){
     b.onclick=function(){RSET[key]=cast?cast(b.getAttribute("data-v")):b.getAttribute("data-v");SCREENS.roomSetup();};});}
@@ -928,18 +928,18 @@ function renderLobby(){
   var html="<div class='card pop center'><h2 style='justify-content:center'>🏠 ルーム <span style='color:var(--indigo)'>"+esc(R2.code)+"</span></h2>"+
     "<div class='sub'>このコードを友達に伝えてください</div>"+
     "<div style='font-size:40px;font-weight:800;letter-spacing:.18em;margin:10px 0'>"+esc(R2.code)+"</div></div>";
-  html+="<div class='card'><h2>👥 参加プレイヤー <span class='badge b-info'>"+ps.length+"人</span></h2>"+
+  html+="<div class='card'><h2>👥 参加プレイヤー <span class='badge badge-info'>"+ps.length+"人</span></h2>"+
     ps.map(function(p){
       return "<div class='rk'>"+avatarHtml("p2p:"+p.name,p.name)+
-        "<div class='nm'>"+esc(p.name)+(p.host?" <span class='badge b-gold'>👑 ホスト</span>":"")+(p.id===R2.myPid?" <span class='badge b-info'>あなた</span>":"")+"</div></div>";
+        "<div class='nm'>"+esc(p.name)+(p.host?" <span class='badge badge-warning'>👑 ホスト</span>":"")+(p.id===R2.myPid?" <span class='badge badge-info'>あなた</span>":"")+"</div></div>";
     }).join("")+
     "<div class='sub' style='margin-top:6px'>"+(isHost?"":"ホストの開始を待っています…")+"</div>";
   if(isHost&&set){
     html+="<label class='f'>設定</label><div class='sub'>"+set.count+"問 ・ "+(set.dir==="mix"?"ミックス":dirName(set.dir))+" ・ "+(set.lv==="mix"?"全パート":LV_NAME[set.lv])+" ・ "+set.limit+"秒</div>"+
-      "<div class='rowbtns mt'><button class='btn ghost' id='rlEdit'>設定を変える</button></div>";
-    html+="<button class='btn pri block mt' id='rlStart'>対戦開始！</button>";
+      "<div class='rowbtns mt'><button class='btn btn-ghost' id='rlEdit'>設定を変える</button></div>";
+    html+="<button class='btn btn-primary w-full mt-3' id='rlStart'>対戦開始！</button>";
   }
-  html+="</div><div class='rowbtns'><button class='btn danger sm' id='rlLeave'>退室する</button></div>";
+  html+="</div><div class='rowbtns'><button class='btn btn-error btn-sm' id='rlLeave'>退室する</button></div>";
   app.innerHTML=html;
   if(isHost){
     if($("#rlStart",app))$("#rlStart",app).onclick=function(){
@@ -1002,7 +1002,7 @@ function updateWaitBox(wait){
     var list=wait&&wait.scores&&wait.scores.length?wait.scores:(R2.isHost?scoreSnapshot():[]);
     sc.innerHTML=list.map(function(p,i){
       return "<div class='rk'>"+avatarHtml("p2p:"+p.name,p.name)+
-        "<div class='nm'>"+(i+1)+"位 "+esc(p.name)+(p.id===R2.myPid?" <span class='badge b-info'>あなた</span>":"")+(p.left?" <span class='badge b-mut'>切断</span>":"")+"</div>"+
+        "<div class='nm'>"+(i+1)+"位 "+esc(p.name)+(p.id===R2.myPid?" <span class='badge badge-info'>あなた</span>":"")+(p.left?" <span class='badge badge-ghost'>切断</span>":"")+"</div>"+
         "<div class='pt'><b>"+p.points+"</b><small>pt</small></div></div>";
     }).join("")||"<div class='empty'>読み込み中…</div>";
   }
@@ -1015,13 +1015,13 @@ function renderRoomReveal(){
   html+="<div class='center' style='font-size:17px;font-weight:800;margin-bottom:12px'>正解： <span style='color:var(--ok)'>"+esc(v.correctText||(v.q?v.q.options[v.correct]:""))+"</span></div>"+
     "<div>"+(v.results||[]).map(function(r){
       return "<div class='rk'>"+avatarHtml("p2p:"+r.name,r.name)+
-        "<div class='nm'>"+esc(r.name)+(r.id===R2.myPid?" <span class='badge b-info'>あなた</span>":"")+
-        "<small><span class='badge "+(r.nas?"b-mut":(r.ok?"b-ok":"b-ng"))+"'>"+(r.nas?"無回答":(r.ok?"正解":"誤答"))+(r.ok&&r.timeMs?" "+secf(r.timeMs):"")+" +"+r.point+"pt</span></small></div>"+
+        "<div class='nm'>"+esc(r.name)+(r.id===R2.myPid?" <span class='badge badge-info'>あなた</span>":"")+
+        "<small><span class='badge "+(r.nas?"badge-ghost":(r.ok?"badge-success":"badge-error"))+"'>"+(r.nas?"無回答":(r.ok?"正解":"誤答"))+(r.ok&&r.timeMs?" "+secf(r.timeMs):"")+" +"+r.point+"pt</span></small></div>"+
         "<div class='pt'><b>"+r.total+"</b><small>pt</small></div></div>";
     }).join("")+"</div>";
   if(R2.isHost&&v.canSkip){
     var last=v.total&&(v.qi+1)>=v.total;
-    html+="<button class='btn pri block mt' id='skipBtn'>"+(last?"結果へすすむ ▶":"次の問題へ ▶")+"</button>";
+    html+="<button class='btn btn-primary w-full mt-3' id='skipBtn'>"+(last?"結果へすすむ ▶":"次の問題へ ▶")+"</button>";
   }else{
     html+="<div class='sub center mt'>次の問題へ… <b>"+remainS+"</b>秒</div>";
   }

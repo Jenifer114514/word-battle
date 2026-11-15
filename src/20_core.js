@@ -166,7 +166,7 @@ function openModal(html){
 }
 function closeModal(){$("#modalroot").innerHTML="";}
 function confirmModal(title,msg,okLabel,onOk,danger){
-  var s=openModal("<h2>"+esc(title)+"</h2><p class='sub'>"+esc(msg)+"</p><div class='rowbtns mt'><button class='btn ghost' id='cmNo'>キャンセル</button><button class='btn "+(danger?"danger":"pri")+"' id='cmOk'>"+esc(okLabel||"OK")+"</button></div>");
+  var s=openModal("<h2>"+esc(title)+"</h2><p class='sub'>"+esc(msg)+"</p><div class='rowbtns mt'><button class='btn btn-ghost' id='cmNo'>キャンセル</button><button class='btn "+(danger?"danger":"pri")+"' id='cmOk'>"+esc(okLabel||"OK")+"</button></div>");
   $("#cmNo",s).onclick=closeModal;
   $("#cmOk",s).onclick=function(){closeModal();onOk();};
 }
@@ -192,15 +192,15 @@ SCREENS.profiles=function(){
   var html="<div class='card'><h2>⚔️ プレイヤー</h2></div>";
   if(acc){
     html+="<div class='card'>"+
-      "<div class='check' style='cursor:default;margin-bottom:10px'>"+avatarHtml(acc.id,acc.name)+esc(acc.name)+"<span class='badge b-ok'>登録済み</span></div>"+
-      "<button class='btn pri block' id='contBtn'>「"+esc(acc.name)+"」ではじめる</button>"+
-      "<button class='btn ghost block' style='margin-top:9px' id='guestBtn2'>ゲストではじめる</button>"+
+      "<div class='check' style='cursor:default;margin-bottom:10px'>"+avatarHtml(acc.id,acc.name)+esc(acc.name)+"<span class='badge badge-success'>登録済み</span></div>"+
+      "<button class='btn btn-primary w-full' id='contBtn'>「"+esc(acc.name)+"」ではじめる</button>"+
+      "<button class='btn btn-ghost w-full' style='margin-top:9px' id='guestBtn2'>ゲストではじめる</button>"+
       "<div class='sub' style='margin-top:8px;font-size:12px'>ゲストの戦績は保存されません（ページを閉じると消えます）</div></div>";
   }else{
     html+="<div class='card'><h2>🆕 新規登録</h2>"+
       "<label class='f'>ユーザー名（2〜12文字）</label><input type='text' id='npName' maxlength='12' placeholder='例：ゆうた'>"+
-      "<button class='btn pri block mt' id='npGo'>登録して開始</button></div>";
-    html+="<div class='card'><button class='btn pk block' id='guestBtn'>ゲストではじめる</button>"+
+      "<button class='btn btn-primary w-full mt-3' id='npGo'>登録して開始</button></div>";
+    html+="<div class='card'><button class='btn btn-secondary w-full' id='guestBtn'>ゲストではじめる</button>"+
       "<div class='sub' style='margin-top:8px;font-size:12px'>ゲストの戦績は保存されません（ページを閉じると消えます）</div></div>";
   }
   html+="<div class='foot'>英単語バトル ver 3.1<br><button id='aboutBtn'>このアプリについて</button></div>";
@@ -227,7 +227,7 @@ SCREENS.home=function(){
   var st=battleStats(m);
   var html="";
   html+="<div class='card pop'><div style='display:flex;align-items:center;gap:12px'>"+avatarHtml(m.id,m.name,"big")+
-    "<div><h2 style='margin-bottom:3px'>ようこそ、"+esc(m.name)+"！"+(m.guest?" <span class='badge b-info'>ゲスト</span>":"")+"</h2><div class='sub'>対戦 "+st.total+"回 ・ 勝率 "+pctf(st.winRate)+" ・ 累計 "+st.points+"pt"+(st.streakCur>0?" ・ 🔥"+st.streakCur+"連勝中":"")+"</div></div></div></div>";
+    "<div><h2 style='margin-bottom:3px'>ようこそ、"+esc(m.name)+"！"+(m.guest?" <span class='badge badge-info'>ゲスト</span>":"")+"</h2><div class='sub'>対戦 "+st.total+"回 ・ 勝率 "+pctf(st.winRate)+" ・ 累計 "+st.points+"pt"+(st.streakCur>0?" ・ 🔥"+st.streakCur+"連勝中":"")+"</div></div></div></div>";
   html+="<button class='mi' data-go='roomSetup'><span class='ic'>🌐</span><span class='tx'>ルームで対戦<small>4桁コードで別々の端末と同時対戦（P2P）</small></span><span class='arr'>▶</span></button>";
   html+="<button class='mi' data-go='stats'><span class='ic'>📊</span><span class='tx'>戦績・統計<small>グラフ・単語別の成績を可視化</small></span><span class='arr'>▶</span></button>";
   html+="<button class='mi' data-go='history'><span class='ic'>📜</span><span class='tx'>対戦履歴<small>各試合の詳細な記録</small></span><span class='arr'>▶</span></button>";
@@ -238,8 +238,8 @@ SCREENS.home=function(){
 function aboutModal(){
   openModal("<h2>ℹ️ このアプリについて</h2><p class='sub'>英単語の4択クイズを、PeerJS（P2P）で別々の端末から同時対戦できるアプリです。</p>"+
   "<h3>収録語彙</h3><p class='sub'>鉄壁 改訂版の "+WORDS.length+"語を収録。収録順を3分割し、Part 1／Part 2／Part 3 として出題範囲を選べます。</p>"+
-  "<h3>主な機能</h3><div class='klist'><span class='badge b-info'>ルーム対戦（P2P・同時）</span><span class='badge b-ok'>戦績・グラフ統計</span><span class='badge b-warn'>単語別統計</span><span class='badge b-info'>プレイヤー比較</span></div>"+
-  "<div class='rowbtns mt'><button class='btn pri block' id='abOk'>閉じる</button></div>");
+  "<h3>主な機能</h3><div class='klist'><span class='badge badge-info'>ルーム対戦（P2P・同時）</span><span class='badge badge-success'>戦績・グラフ統計</span><span class='badge badge-warning'>単語別統計</span><span class='badge badge-info'>プレイヤー比較</span></div>"+
+  "<div class='rowbtns mt'><button class='btn btn-primary w-full' id='abOk'>閉じる</button></div>");
   $("#abOk").onclick=closeModal;
 }
 

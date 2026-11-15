@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="ja" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -50,20 +50,7 @@ h1,h2,h3,h4{margin:0}
 .banner{background:#fff7ed;border:1.5px solid #fdba74;color:#9a3412;border-radius:12px;padding:10px 13px;font-size:13px;margin-bottom:13px;font-weight:700;line-height:1.6}
 #gbar{max-width:760px;margin:12px auto -2px;padding:0 14px}
 #gbar .banner{margin-bottom:0}
-.notice{background:#eff6ff;border:1.5px solid #bfdbfe;color:#1e40af;border-radius:12px;padding:10px 13px;font-size:12.5px;margin-bottom:13px;line-height:1.7}
-.notice b{display:block;margin-bottom:2px}
-/* ---------- buttons ---------- */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:12px;padding:12px 18px;
-  font-size:15px;font-weight:800;cursor:pointer;background:#eef2ff;color:#4338ca;transition:transform .12s,box-shadow .12s}
-.btn:active{transform:scale(.965)}
-.btn.pri{background:linear-gradient(135deg,var(--indigo),var(--violet));color:#fff;box-shadow:0 4px 14px rgba(99,102,241,.35)}
-.btn.pk{background:linear-gradient(135deg,var(--pink),var(--rose));color:#fff;box-shadow:0 4px 14px rgba(236,72,153,.35)}
-.btn.ok{background:#d1fae5;color:#065f46}
-.btn.danger{background:#fee2e2;color:#b91c1c}
-.btn.ghost{background:#fff;border:1.5px solid var(--line);color:var(--sub)}
-.btn.sm{padding:7px 12px;font-size:12.5px;border-radius:9px;font-weight:700}
-.btn.block{width:100%}
-.btn:disabled{opacity:.45;cursor:not-allowed;transform:none}
+/* ---------- buttons（DaisyUI btn 使用・共用補助のみ） ---------- */
 .rowbtns{display:flex;gap:8px;flex-wrap:wrap}
 /* ---------- menu ---------- */
 .mi{display:flex;gap:13px;align-items:center;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);
@@ -81,9 +68,7 @@ input[type=text],input[type=password],input[type=search],input[type=number],sele
   border-radius:11px;font-size:15px;background:#fff;color:var(--ink);font-family:inherit}
 textarea{font-size:12px;font-family:ui-monospace,monospace}
 input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:var(--indigo)}
-.seg{display:flex;gap:6px;flex-wrap:wrap}
-.seg button{flex:1;min-width:66px;padding:10px 6px;border-radius:10px;border:1.5px solid var(--line);background:#fff;font-weight:800;cursor:pointer;color:var(--sub);font-size:13.5px}
-.seg button.on{border-color:var(--indigo);background:#eef2ff;color:#4338ca}
+/* seg → DaisyUI join を使用 */
 .check{display:flex;align-items:center;gap:9px;padding:11px 12px;border:1.5px solid var(--line);border-radius:11px;margin-bottom:8px;background:#fff;cursor:pointer;font-size:14px;font-weight:700}
 .check input{width:18px;height:18px;accent-color:var(--indigo)}
 .check .pinok{margin-left:auto}
@@ -126,17 +111,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:v
 .turnbar .lbl{font-size:12px;color:var(--sub);font-weight:800}
 /* ---------- tables ---------- */
 .tscroll{overflow-x:auto}
-.tbl{width:100%;border-collapse:collapse;font-size:13px}
-.tbl th{color:var(--sub);font-weight:800;text-align:left;padding:8px 7px;border-bottom:2px solid var(--line);white-space:nowrap;font-size:11.5px}
-.tbl td{padding:8px 7px;border-bottom:1px solid #eef2f7;vertical-align:middle}
-.tbl tr:last-child td{border-bottom:0}
-.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
-.tbl .c{text-align:center}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.c{text-align:center}
 /* ---------- badges / meter ---------- */
-.badge{display:inline-block;padding:2.5px 9px;border-radius:99px;font-size:11px;font-weight:800;white-space:nowrap}
-.b-gold{background:#fef3c7;color:#92400e}.b-sil{background:#e2e8f0;color:#334155}.b-brz{background:#ffedd5;color:#9a3412}
-.b-ok{background:#d1fae5;color:#065f46}.b-ng{background:#fee2e2;color:#991b1b}.b-info{background:#e0e7ff;color:#3730a3}
-.b-warn{background:#fef3c7;color:#92400e}.b-mut{background:#f1f5f9;color:#475569}.b-pk{background:#fce7f3;color:#9d174d}
+/* badge → DaisyUI badge を使用 */
+.b-gold{background:#fef3c7;color:#92400e!important}.b-sil{background:#e2e8f0;color:#334155!important}.b-brz{background:#ffedd5;color:#9a3412!important}
 .meter{height:7px;background:#f1f5f9;border-radius:99px;overflow:hidden;min-width:56px}
 .meter i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#fbbf24,#ef4444)}
 .meter.acc i{background:linear-gradient(90deg,#34d399,#10b981)}
@@ -162,9 +141,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:v
 .dot{stroke:#fff;stroke-width:1.5}
 .bar{rx:3}
 /* ---------- tabs ---------- */
-.tabs{display:flex;gap:6px;margin-bottom:13px;overflow-x:auto;padding-bottom:2px}
-.tabs button{flex:none;padding:9px 15px;border-radius:99px;border:1.5px solid var(--line);background:#fff;font-weight:800;cursor:pointer;color:var(--sub);font-size:13px}
-.tabs button.on{background:linear-gradient(135deg,var(--indigo),var(--violet));border-color:transparent;color:#fff}
+/* tabs → DaisyUI tabs-boxed を使用 */
 /* ---------- modal / toast ---------- */
 .modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .15s}
 @media(min-width:560px){.modal{align-items:center}}
@@ -218,9 +195,3 @@ input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:v
 .crow{display:flex;gap:8px}
 .crow input{flex:1}
 </style>
-</head>
-<body>
-<div id="gbar"></div>
-<header id="topbar"></header>
-<main class="wrap" id="app"></main>
-<div id="modalroot"></div>

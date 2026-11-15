@@ -1,7 +1,10 @@
 #!/bin/bash
+# word-battle.html を生成する。
+# CSSを変更した場合: npm i && npx tailwindcss -i tw.input.css -o src/03_tailwind.css --minify
+# （DaisyUI/Tailwindのコンパイル済みCSSを src/03_tailwind.css に同梱しているため npm は実行時に不要）
 set -e
 cd "$(dirname "$0")"
-cat src/01_head.html src/05_peerjs.html src/02_script_open.html src/10_words.js src/20_core.js src/30_battle.js src/35_room.js src/50_stats.js src/60_data.js src/99_tail.html > word-battle.html
+cat src/01_head.html src/03_tailwind.css src/04_body.html src/05_peerjs.html src/02_script_open.html src/10_words.js src/20_core.js src/30_battle.js src/35_room.js src/50_stats.js src/60_data.js src/99_tail.html > word-battle.html
 python3 - <<'PY'
 import re
 h=open('word-battle.html',encoding='utf-8').read()

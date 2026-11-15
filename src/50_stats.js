@@ -4,7 +4,7 @@ var SVIEW={mode:"all",q:"",sort:"asked"};
 SCREENS.stats=function(){
   var m=me();if(!m)return go("profiles");
   var tabs=[["overview","📊 概要"],["graphs","📈 グラフ"],["words","🔤 単語別"],["compare","🆚 比較"]];
-  var html="<div class='tabs'>"+tabs.map(function(t){return "<button data-t='"+t[0]+"' class='"+(STAB===t[0]?"on":"")+"'>"+t[1]+"</button>";}).join("")+"</div>";
+  var html="<div class='tabs tabs-boxed'>"+tabs.map(function(t){return "<button data-t='"+t[0]+"' class='tab "+(STAB===t[0]?"tab-active":"")+"'>"+t[1]+"</button>";}).join("")+"</div>";
   app.innerHTML=html;
   $$("[data-t]",app).forEach(function(b){b.onclick=function(){STAB=b.getAttribute("data-t");SCREENS.stats();};});
   var holder=document.createElement("div");app.appendChild(holder);
@@ -13,7 +13,7 @@ SCREENS.stats=function(){
   else if(STAB==="words")statsWords(m,holder);
   else statsCompare(m,holder);
   var back=document.createElement("div");back.className="rowbtns mt";
-  back.innerHTML="<button class='btn ghost block' id='stBack'>🏠 ホームへ戻る</button>";
+  back.innerHTML="<button class='btn btn-ghost w-full' id='stBack'>🏠 ホームへ戻る</button>";
   app.appendChild(back);
   $("#stBack",app).onclick=function(){go("home");};
 };
@@ -153,13 +153,13 @@ function statsWords(m,el){
     });
     var t="<div class='card'><h2>🔤 単語別統計<small class='sub' style='font-weight:600'>（"+rows.length+"語）</small></h2>";
     if(!rows.length)t+="<div class='empty'>データがありません</div>";
-    else{t+="<div class='tscroll'><table class='tbl'><tr><th>単語</th><th class='num'>出題</th><th class='num'>正解</th><th class='num'>誤答</th><th class='num'>正答率</th><th class='num'>平均</th><th class='num'>英→日</th><th class='num'>日→英</th><th>最終回答</th></tr>";
+    else{t+="<div class='tscroll'><table class='table table-sm'><tr><th>単語</th><th class='num'>出題</th><th class='num'>正解</th><th class='num'>誤答</th><th class='num'>正答率</th><th class='num'>平均</th><th class='num'>英→日</th><th class='num'>日→英</th><th>最終回答</th></tr>";
       rows.slice(0,80).forEach(function(r){
         var acc=r.agg.correct/r.agg.asked,avg=r.agg.sumTime/r.agg.asked;
         var de=r.agg.dir.ej,dj2=r.agg.dir.je;
         t+="<tr><td><b>"+esc(r.w.e)+"</b><small style='display:block;color:var(--sub)'>"+esc(r.w.j)+"</small></td>"+
           "<td class='num'>"+r.agg.asked+"</td><td class='num'>"+r.agg.correct+"</td><td class='num'>"+r.agg.wrong+"</td>"+
-          "<td class='num'><span class='badge "+(acc>=0.8?"b-ok":acc>=0.5?"b-warn":"b-ng")+"'>"+pctf(acc)+"</span></td>"+
+          "<td class='num'><span class='badge "+(acc>=0.8?"badge-success":acc>=0.5?"badge-warning":"badge-error")+"'>"+pctf(acc)+"</span></td>"+
           "<td class='num'>"+secf(avg)+"</td>"+
           "<td class='num'>"+(de.a?pctf(de.c/de.a):"−")+"</td><td class='num'>"+(dj2.a?pctf(dj2.c/dj2.a):"−")+"</td>"+
           "<td style='white-space:nowrap;font-size:11.5px;color:var(--sub)'>"+(r.agg.lastAt?dstr(r.agg.lastAt):"−")+"</td></tr>";
@@ -214,7 +214,7 @@ function statsCompare(m,el){
   html+="</div>";
   list.forEach(function(o){
     var oppLabel=o.isCpu?"🤖 "+esc(o.name):esc(o.name);
-    html+="<div class='card'><h2>"+oppLabel+" <span class='badge "+(o.winRate>=0.5?"b-ok":"b-ng")+"'>勝率 "+pctf(o.winRate)+"</span></h2>"+
+    html+="<div class='card'><h2>"+oppLabel+" <span class='badge "+(o.winRate>=0.5?"badge-success":"badge-error")+"'>勝率 "+pctf(o.winRate)+"</span></h2>"+
       "<div class='grid3'>"+
       "<div class='stat'><div class='v'>"+o.matches+"<small> 回</small></div><div class='k'>通算対戦</div></div>"+
       "<div class='stat'><div class='v' style='color:var(--ok)'>"+o.w+"<small> 勝</small></div><div class='k'>勝ち</div></div>"+
@@ -235,8 +235,8 @@ function statsCompare(m,el){
       var v=wordsVs(m,key);
       function wl(items,cls){return items.length?items.map(function(x){var w=WORD_BY[x.wid];
         return "<span class='badge "+cls+"'>"+esc(w.e)+"（"+esc(w.j)+"）×"+x.n+"</span>";}).join(" "):"<span class='sub'>—</span>";}
-      box.innerHTML="<div style='margin-top:10px'><h3>💪 自分の得意単語 <small>（自分○/相手✗）</small></h3><div class='klist'>"+wl(v.strong,"b-ok")+"</div>"+
-        "<h3>😵 自分の苦手単語 <small>（自分✗/相手○）</small></h3><div class='klist'>"+wl(v.weak,"b-ng")+"</div></div>";
+      box.innerHTML="<div style='margin-top:10px'><h3>💪 自分の得意単語 <small>（自分○/相手✗）</small></h3><div class='klist'>"+wl(v.strong,"badge-success")+"</div>"+
+        "<h3>😵 自分の苦手単語 <small>（自分✗/相手○）</small></h3><div class='klist'>"+wl(v.weak,"badge-error")+"</div></div>";
       box.style.display="block";b.textContent="閉じる";
     };
   });
@@ -244,7 +244,7 @@ function statsCompare(m,el){
 
 /* ---------- 対戦履歴 ---------- */
 function historyItemHtml(b){
-  var resB=b.me.res==="w"?"b-ok":b.me.res==="d"?"b-warn":"b-ng";
+  var resB=b.me.res==="w"?"badge-success":b.me.res==="d"?"badge-warning":"badge-error";
   var resT=b.me.res==="w"?"勝利":b.me.res==="d"?"引き分け":"敗北";
   return "<button class='mi' data-bid='"+b.id+"'><span class='ic'>🌐</span>"+
     "<span class='tx'>"+dtf(b.date)+"<small>"+b.players.map(function(p){return esc(p.name);}).join(" ・ ")+"</small></span>"+
@@ -259,7 +259,7 @@ SCREENS.history=function(){
   var html="<div class='card'><h2>📜 対戦履歴<small class='sub' style='font-weight:600'>（"+bs.length+"件）</small></h2>";
   if(!bs.length)html+="<div class='empty'><span class='big'>📜</span>まだ対戦記録がありません</div>";
   bs.forEach(function(b){html+=historyItemHtml(b);});
-  html+="</div><div class='rowbtns'><button class='btn ghost block' id='hBack'>ホームへ</button></div>";
+  html+="</div><div class='rowbtns'><button class='btn btn-ghost w-full' id='hBack'>ホームへ</button></div>";
   app.innerHTML=html;
   wireHistoryItems(app);
   $("#hBack",app).onclick=function(){go("home");};
@@ -268,7 +268,7 @@ SCREENS.battleDetail=function(params){
   var m=me();if(!m)return go("profiles");
   var b=null;(m.battles||[]).forEach(function(x){if(x.id===params.id)b=x;});
   if(!b)return go("history");
-  var resB=b.me.res==="w"?"b-ok":b.me.res==="d"?"b-warn":"b-ng";
+  var resB=b.me.res==="w"?"badge-success":b.me.res==="d"?"badge-warning":"badge-error";
   var html="<div class='card'><h2>📜 対戦詳細</h2><div class='sub'>"+dtf(b.date)+" ・ ルーム対戦 ・ ルーム "+esc(String(b.roomId).replace("room-",""))+" ・ "+b.questions.length+"問</div>"+
     "<div class='grid3 mt'>"+
     "<div class='stat hi'><div class='v'><span class='badge "+resB+"' style='font-size:13px'>"+(b.me.res==="w"?"勝利":b.me.res==="d"?"引き分け":"敗北")+"</span></div><div class='k'>結果（"+b.me.rank+"位）</div></div>"+
@@ -283,16 +283,16 @@ SCREENS.battleDetail=function(params){
       "<div class='nm'>"+esc(p.name)+"<small>"+p.rank+"位 ・ 正解 "+p.correct+"/"+b.questions.length+" ・ "+pctf(p.accuracy)+" ・ "+secf(p.avgTimeMs)+"</small></div>"+
       "<div class='pt'><b>"+p.points+"</b><small>pt</small></div></div>";
   });
-  html+="</div><div class='card'><h2>📝 各問題の回答結果</h2><div class='tscroll'><table class='tbl'><tr><th>#</th><th>単語</th><th>方向</th><th>あなたの回答</th><th>正解</th><th class='c'>正誤</th><th class='num'>時間</th><th class='num'>pt</th><th>全員</th></tr>";
+  html+="</div><div class='card'><h2>📝 各問題の回答結果</h2><div class='tscroll'><table class='table table-sm'><tr><th>#</th><th>単語</th><th>方向</th><th>あなたの回答</th><th>正解</th><th class='c'>正誤</th><th class='num'>時間</th><th class='num'>pt</th><th>全員</th></tr>";
   b.questions.forEach(function(q,i){
     var w=WORD_BY[q.wid];
     var all=q.all.map(function(a){return (a.isCpu?"🤖":"")+(a.ok?"○":"✗");}).join(" ");
     html+="<tr><td>"+(i+1)+"</td><td><b>"+esc(q.dir==="ej"?w.e:w.j)+"</b><small style='display:block;color:var(--sub)'>"+esc(q.dir==="ej"?w.j:w.e)+"</small></td>"+
       "<td style='white-space:nowrap;font-size:11.5px'>"+dirName(q.dir)+"</td><td style='font-size:12px'>"+esc(q.ans)+"</td><td style='font-size:12px'>"+esc(q.correctText)+"</td>"+
-      "<td class='c'><span class='badge "+(q.ok?"b-ok":"b-ng")+"'>"+(q.ok?"○":"✗")+"</span></td>"+
+      "<td class='c'><span class='badge "+(q.ok?"badge-success":"badge-error")+"'>"+(q.ok?"○":"✗")+"</span></td>"+
       "<td class='num'>"+secf(q.timeMs)+"</td><td class='num'>"+q.point+"</td><td style='white-space:nowrap;font-size:11.5px'>"+esc(all)+"</td></tr>";
   });
-  html+="</table></div></div><div class='rowbtns'><button class='btn ghost' id='bdBack' style='flex:1'>履歴へ戻る</button></div>";
+  html+="</table></div></div><div class='rowbtns'><button class='btn btn-ghost' id='bdBack' style='flex:1'>履歴へ戻る</button></div>";
   app.innerHTML=html;
   $("#bdBack",app).onclick=function(){go("history");};
 };
