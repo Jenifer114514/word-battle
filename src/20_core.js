@@ -33,7 +33,7 @@ function dtf(iso){var d=new Date(iso);return d.getFullYear()+"/"+pad2(d.getMonth
 var COLORS=["#6366f1","#ec4899","#10b981","#f59e0b","#06b6d4","#8b5cf6","#ef4444","#14b8a6"];
 function colorOf(pid){var p=DB.profiles[pid];if(p&&p.color)return p.color;var h=0;var s=String(pid||"?");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLORS[h%COLORS.length];}
 function avatarHtml(pid,name,cls){var n=(name||"?").trim();var ch=n?n[0].toUpperCase():"?";var cls2=cls||"";
-  return "<span class='avatar "+cls2+"' style='background:"+colorOf(pid)+"'>"+esc(ch)+"</span>";}
+  return "<span class='app-avatar "+cls2+"' style='background:"+colorOf(pid)+"'>"+esc(ch)+"</span>";}
 function toast(msg){var t=document.createElement("div");t.className="app-toast";t.textContent=msg;document.body.appendChild(t);
   setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(function(){t.remove();},320);},1900);}
 function dirName(dir){return dir==="ej"?"英→日":"日→英";}
@@ -160,13 +160,13 @@ function pend(fn,ms){if(!PEND)PEND=[];var id=setTimeout(fn,ms);PEND.push(id);ret
 function openModal(html){
   closeModal();
   var r=$("#modalroot");
-  r.innerHTML="<div class='modal'><div class='sheet'>"+html+"</div></div>";
+  r.innerHTML="<div class='app-modal'><div class='sheet'>"+html+"</div></div>";
   $(".modal",r).addEventListener("click",function(e){if(e.target===this)closeModal();});
   return $(".sheet",r);
 }
 function closeModal(){$("#modalroot").innerHTML="";}
 function confirmModal(title,msg,okLabel,onOk,danger){
-  var s=openModal("<h2>"+esc(title)+"</h2><p class='sub'>"+esc(msg)+"</p><div class='rowbtns mt'><button class='btn btn-ghost' id='cmNo'>キャンセル</button><button class='btn "+(danger?"danger":"pri")+"' id='cmOk'>"+esc(okLabel||"OK")+"</button></div>");
+  var s=openModal("<h2>"+esc(title)+"</h2><p class='sub'>"+esc(msg)+"</p><div class='rowbtns mt'><button class='btn btn-ghost' id='cmNo'>キャンセル</button><button class='btn "+(danger?"btn-error":"btn-primary")+"' id='cmOk'>"+esc(okLabel||"OK")+"</button></div>");
   $("#cmNo",s).onclick=closeModal;
   $("#cmOk",s).onclick=function(){closeModal();onOk();};
 }

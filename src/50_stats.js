@@ -22,16 +22,16 @@ function statsOverview(m,el){
   var st=battleStats(m);
   var bs=(m.battles||[]).slice().sort(function(a,b){return a.date<b.date?1:-1;});
   var html="<div class='card'><h2>📊 基本戦績</h2><div class='grid3'>"+
-    "<div class='stat hi'><div class='v'>"+st.total+"<small> 回</small></div><div class='k'>総対戦回数</div></div>"+
-    "<div class='stat'><div class='v' style='color:var(--ok)'>"+st.w+"<small> 勝</small></div><div class='k'>勝利</div></div>"+
-    "<div class='stat'><div class='v' style='color:var(--ng)'>"+st.l+"<small> 負</small></div><div class='k'>敗北</div></div>"+
-    "<div class='stat'><div class='v'>"+st.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
-    "<div class='stat hi'><div class='v'>"+pctf(st.winRate)+"</div><div class='k'>勝率</div></div>"+
-    "<div class='stat hi'><div class='v'>"+st.points+"<small> pt</small></div><div class='k'>累計獲得ポイント</div></div>"+
-    "<div class='stat'><div class='v'>"+pctf(st.avgAcc)+"</div><div class='k'>平均正答率</div></div>"+
-    "<div class='stat'><div class='v'>"+secf(st.avgTime)+"</div><div class='k'>平均回答時間</div></div>"+
-    "<div class='stat'><div class='v'>"+st.streakBest+"<small> 連勝</small></div><div class='k'>連勝記録（最高）</div></div>"+
-    "<div class='stat'><div class='v'>🔥 "+st.streakCur+"<small> 連勝</small></div><div class='k'>現在の連勝数</div></div>"+
+    "<div class='app-stat hi'><div class='v'>"+st.total+"<small> 回</small></div><div class='k'>総対戦回数</div></div>"+
+    "<div class='app-stat'><div class='v' style='color:var(--ok)'>"+st.w+"<small> 勝</small></div><div class='k'>勝利</div></div>"+
+    "<div class='app-stat'><div class='v' style='color:var(--ng)'>"+st.l+"<small> 負</small></div><div class='k'>敗北</div></div>"+
+    "<div class='app-stat'><div class='v'>"+st.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
+    "<div class='app-stat hi'><div class='v'>"+pctf(st.winRate)+"</div><div class='k'>勝率</div></div>"+
+    "<div class='app-stat hi'><div class='v'>"+st.points+"<small> pt</small></div><div class='k'>累計獲得ポイント</div></div>"+
+    "<div class='app-stat'><div class='v'>"+pctf(st.avgAcc)+"</div><div class='k'>平均正答率</div></div>"+
+    "<div class='app-stat'><div class='v'>"+secf(st.avgTime)+"</div><div class='k'>平均回答時間</div></div>"+
+    "<div class='app-stat'><div class='v'>"+st.streakBest+"<small> 連勝</small></div><div class='k'>連勝記録（最高）</div></div>"+
+    "<div class='app-stat'><div class='v'>🔥 "+st.streakCur+"<small> 連勝</small></div><div class='k'>現在の連勝数</div></div>"+
     "</div></div>";
   html+="<div class='card'><h2>🕘 直近の対戦</h2>";
   if(!bs.length)html+="<div class='empty'><span class='big'>⚔️</span>まだ対戦記録がありません</div>";
@@ -108,10 +108,10 @@ function statsGraphs(m,el){
   html+="<div class='card'><h2>⏱ 平均回答時間の推移<small class='sub' style='font-weight:600'>（対戦ごと・秒）</small></h2><div class='chartbox'>"+chartLine(tm,lb,{color:"#06b6d4"})+"</div></div>";
   html+="<div class='card'><h2>🔄 英語→日本語 vs 日本語→英語</h2>"+
     "<div class='grid2'>"+
-    "<div class='stat'><div class='k'>英語→日本語 正答率</div><div class='v'>"+pctf(de.a?de.c/de.a:0)+"<small>　"+de.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(de.a?de.c/de.a*100:0)+"%'></i></div></div>"+
-    "<div class='stat'><div class='k'>日本語→英語 正答率</div><div class='v'>"+pctf(dj.a?dj.c/dj.a:0)+"<small>　"+dj.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(dj.a?dj.c/dj.a*100:0)+"%'></i></div></div>"+
-    "<div class='stat'><div class='k'>英語→日本語 平均時間</div><div class='v'>"+(de.a?secf(de.t/de.a):"−")+"</div></div>"+
-    "<div class='stat'><div class='k'>日本語→英語 平均時間</div><div class='v'>"+(dj.a?secf(dj.t/dj.a):"−")+"</div></div></div>"+
+    "<div class='app-stat'><div class='k'>英語→日本語 正答率</div><div class='v'>"+pctf(de.a?de.c/de.a:0)+"<small>　"+de.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(de.a?de.c/de.a*100:0)+"%'></i></div></div>"+
+    "<div class='app-stat'><div class='k'>日本語→英語 正答率</div><div class='v'>"+pctf(dj.a?dj.c/dj.a:0)+"<small>　"+dj.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(dj.a?dj.c/dj.a*100:0)+"%'></i></div></div>"+
+    "<div class='app-stat'><div class='k'>英語→日本語 平均時間</div><div class='v'>"+(de.a?secf(de.t/de.a):"−")+"</div></div>"+
+    "<div class='app-stat'><div class='k'>日本語→英語 平均時間</div><div class='v'>"+(dj.a?secf(dj.t/dj.a):"−")+"</div></div></div>"+
     "<div class='sub' style='margin-top:8px'>"+(de.c>=dj.c?"英語→日本語の方が得意です":"日本語→英語の方が得意です")+"（"+"対戦成績ベース"+"）</div></div>";
   el.innerHTML=html;
 }
@@ -216,12 +216,12 @@ function statsCompare(m,el){
     var oppLabel=o.isCpu?"🤖 "+esc(o.name):esc(o.name);
     html+="<div class='card'><h2>"+oppLabel+" <span class='badge "+(o.winRate>=0.5?"badge-success":"badge-error")+"'>勝率 "+pctf(o.winRate)+"</span></h2>"+
       "<div class='grid3'>"+
-      "<div class='stat'><div class='v'>"+o.matches+"<small> 回</small></div><div class='k'>通算対戦</div></div>"+
-      "<div class='stat'><div class='v' style='color:var(--ok)'>"+o.w+"<small> 勝</small></div><div class='k'>勝ち</div></div>"+
-      "<div class='stat'><div class='v' style='color:var(--ng)'>"+o.l+"<small> 負</small></div><div class='k'>負け</div></div>"+
-      "<div class='stat'><div class='v'>"+o.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
-      "<div class='stat'><div class='k'>自分の平均正答率</div><div class='v'>"+pctf(o.myAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.myAvgAcc*100)+"%'></i></div></div>"+
-      "<div class='stat'><div class='k'>相手の平均正答率</div><div class='v'>"+pctf(o.opAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.opAvgAcc*100)+"%'></i></div></div></div>"+
+      "<div class='app-stat'><div class='v'>"+o.matches+"<small> 回</small></div><div class='k'>通算対戦</div></div>"+
+      "<div class='app-stat'><div class='v' style='color:var(--ok)'>"+o.w+"<small> 勝</small></div><div class='k'>勝ち</div></div>"+
+      "<div class='app-stat'><div class='v' style='color:var(--ng)'>"+o.l+"<small> 負</small></div><div class='k'>負け</div></div>"+
+      "<div class='app-stat'><div class='v'>"+o.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
+      "<div class='app-stat'><div class='k'>自分の平均正答率</div><div class='v'>"+pctf(o.myAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.myAvgAcc*100)+"%'></i></div></div>"+
+      "<div class='app-stat'><div class='k'>相手の平均正答率</div><div class='v'>"+pctf(o.opAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.opAvgAcc*100)+"%'></i></div></div></div>"+
       "<div class='rowbtns mt'><button class='btn sm ghost' data-exp='"+esc(o.key)+"'>得意・苦手の比較を見る</button></div>"+
       "<div data-cmp='"+esc(o.key)+"' style='display:none'></div></div>";
   });
@@ -271,12 +271,12 @@ SCREENS.battleDetail=function(params){
   var resB=b.me.res==="w"?"badge-success":b.me.res==="d"?"badge-warning":"badge-error";
   var html="<div class='card'><h2>📜 対戦詳細</h2><div class='sub'>"+dtf(b.date)+" ・ ルーム対戦 ・ ルーム "+esc(String(b.roomId).replace("room-",""))+" ・ "+b.questions.length+"問</div>"+
     "<div class='grid3 mt'>"+
-    "<div class='stat hi'><div class='v'><span class='badge "+resB+"' style='font-size:13px'>"+(b.me.res==="w"?"勝利":b.me.res==="d"?"引き分け":"敗北")+"</span></div><div class='k'>結果（"+b.me.rank+"位）</div></div>"+
-    "<div class='stat'><div class='v'>"+b.me.points+"<small> pt</small></div><div class='k'>獲得ポイント</div></div>"+
-    "<div class='stat'><div class='v'>"+pctf(b.me.accuracy)+"</div><div class='k'>正答率</div></div>"+
-    "<div class='stat'><div class='v'>"+b.me.correct+"<small> 問</small></div><div class='k'>正解数</div></div>"+
-    "<div class='stat'><div class='v'>"+b.me.wrong+"<small> 問</small></div><div class='k'>誤答数</div></div>"+
-    "<div class='stat'><div class='v'>"+secf(b.me.avgTimeMs)+"</div><div class='k'>平均回答時間</div></div></div>"+
+    "<div class='app-stat hi'><div class='v'><span class='badge "+resB+"' style='font-size:13px'>"+(b.me.res==="w"?"勝利":b.me.res==="d"?"引き分け":"敗北")+"</span></div><div class='k'>結果（"+b.me.rank+"位）</div></div>"+
+    "<div class='app-stat'><div class='v'>"+b.me.points+"<small> pt</small></div><div class='k'>獲得ポイント</div></div>"+
+    "<div class='app-stat'><div class='v'>"+pctf(b.me.accuracy)+"</div><div class='k'>正答率</div></div>"+
+    "<div class='app-stat'><div class='v'>"+b.me.correct+"<small> 問</small></div><div class='k'>正解数</div></div>"+
+    "<div class='app-stat'><div class='v'>"+b.me.wrong+"<small> 問</small></div><div class='k'>誤答数</div></div>"+
+    "<div class='app-stat'><div class='v'>"+secf(b.me.avgTimeMs)+"</div><div class='k'>平均回答時間</div></div></div>"+
     "<h3>最終順位</h3>";
   b.players.slice().sort(function(a,c){return a.rank-c.rank||c.points-a.points;}).forEach(function(p){
     html+="<div class='rk "+(p.pid===m.id?"me":"")+"'>"+(p.isCpu?"<span class='no'>🤖</span>":avatarHtml(p.pid,p.name))+

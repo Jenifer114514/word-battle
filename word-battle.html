@@ -40,8 +40,8 @@ h1,h2,h3,h4{margin:0}
 .colorgrid .cbtn:active{transform:scale(.9)}
 .colorgrid .cbtn span{display:block;width:60%;height:60%;border-radius:50%}
 @media(max-width:380px){.colorgrid{grid-template-columns:repeat(4,1fr)}}
-.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex:none;line-height:1;text-align:center;overflow:hidden}
-.avatar.big{width:60px;height:60px;font-size:24px;margin:0 auto 8px;line-height:1}
+.app-avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex:none;line-height:1;text-align:center;overflow:hidden}
+.app-avatar.big{width:60px;height:60px;font-size:24px;margin:0 auto 8px;line-height:1}
 
 #lockbtn{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer}
 #lockbtn:active{transform:scale(.94)}
@@ -82,11 +82,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:v
 /* ---------- stats ---------- */
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
-.stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:11px 12px}
-.stat .v{font-size:21px;font-weight:800;letter-spacing:.01em}
+.app-stat{background:#f8fafc;border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+.app-stat .v{font-size:21px;font-weight:800;letter-spacing:.01em}
 .stat .v small{font-size:12px;color:var(--sub);font-weight:700}
-.stat .k{font-size:11px;color:var(--sub);font-weight:700;margin-top:2px}
-.stat.hi{background:linear-gradient(135deg,#eef2ff,#fdf2f8);border-color:#c7d2fe}
+.app-stat .k{font-size:11px;color:var(--sub);font-weight:700;margin-top:2px}
+.app-stat.hi{background:linear-gradient(135deg,#eef2ff,#fdf2f8);border-color:#c7d2fe}
 /* ---------- battle ---------- */
 .qdir{text-align:center;color:var(--sub);font-size:12.5px;font-weight:800;letter-spacing:.04em}
 .qword{font-size:31px;font-weight:800;text-align:center;padding:16px 6px 12px;letter-spacing:.02em;word-break:break-word}
@@ -150,8 +150,8 @@ input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:v
 /* ---------- tabs ---------- */
 /* tabs → DaisyUI tabs-boxed を使用 */
 /* ---------- modal / toast ---------- */
-.modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .15s}
-@media(min-width:560px){.modal{align-items:center}}
+.app-modal{position:fixed;inset:0;background:rgba(15,23,42,.5);display:flex;align-items:flex-end;justify-content:center;z-index:50;animation:fade .15s}
+@media(min-width:560px){.app-modal{align-items:center}}
 .sheet{background:#fff;width:100%;max-width:580px;max-height:86vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px;animation:up .18s}
 @media(min-width:560px){.sheet{border-radius:20px}}
 .sheet h2{font-size:16.5px;margin-bottom:10px}
@@ -2442,7 +2442,7 @@ function dtf(iso){var d=new Date(iso);return d.getFullYear()+"/"+pad2(d.getMonth
 var COLORS=["#6366f1","#ec4899","#10b981","#f59e0b","#06b6d4","#8b5cf6","#ef4444","#14b8a6"];
 function colorOf(pid){var p=DB.profiles[pid];if(p&&p.color)return p.color;var h=0;var s=String(pid||"?");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLORS[h%COLORS.length];}
 function avatarHtml(pid,name,cls){var n=(name||"?").trim();var ch=n?n[0].toUpperCase():"?";var cls2=cls||"";
-  return "<span class='avatar "+cls2+"' style='background:"+colorOf(pid)+"'>"+esc(ch)+"</span>";}
+  return "<span class='app-avatar "+cls2+"' style='background:"+colorOf(pid)+"'>"+esc(ch)+"</span>";}
 function toast(msg){var t=document.createElement("div");t.className="app-toast";t.textContent=msg;document.body.appendChild(t);
   setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(function(){t.remove();},320);},1900);}
 function dirName(dir){return dir==="ej"?"英→日":"日→英";}
@@ -2569,13 +2569,13 @@ function pend(fn,ms){if(!PEND)PEND=[];var id=setTimeout(fn,ms);PEND.push(id);ret
 function openModal(html){
   closeModal();
   var r=$("#modalroot");
-  r.innerHTML="<div class='modal'><div class='sheet'>"+html+"</div></div>";
+  r.innerHTML="<div class='app-modal'><div class='sheet'>"+html+"</div></div>";
   $(".modal",r).addEventListener("click",function(e){if(e.target===this)closeModal();});
   return $(".sheet",r);
 }
 function closeModal(){$("#modalroot").innerHTML="";}
 function confirmModal(title,msg,okLabel,onOk,danger){
-  var s=openModal("<h2>"+esc(title)+"</h2><p class='sub'>"+esc(msg)+"</p><div class='rowbtns mt'><button class='btn btn-ghost' id='cmNo'>キャンセル</button><button class='btn "+(danger?"danger":"pri")+"' id='cmOk'>"+esc(okLabel||"OK")+"</button></div>");
+  var s=openModal("<h2>"+esc(title)+"</h2><p class='sub'>"+esc(msg)+"</p><div class='rowbtns mt'><button class='btn btn-ghost' id='cmNo'>キャンセル</button><button class='btn "+(danger?"btn-error":"btn-primary")+"' id='cmOk'>"+esc(okLabel||"OK")+"</button></div>");
   $("#cmNo",s).onclick=closeModal;
   $("#cmOk",s).onclick=function(){closeModal();onOk();};
 }
@@ -3754,16 +3754,16 @@ function statsOverview(m,el){
   var st=battleStats(m);
   var bs=(m.battles||[]).slice().sort(function(a,b){return a.date<b.date?1:-1;});
   var html="<div class='card'><h2>📊 基本戦績</h2><div class='grid3'>"+
-    "<div class='stat hi'><div class='v'>"+st.total+"<small> 回</small></div><div class='k'>総対戦回数</div></div>"+
-    "<div class='stat'><div class='v' style='color:var(--ok)'>"+st.w+"<small> 勝</small></div><div class='k'>勝利</div></div>"+
-    "<div class='stat'><div class='v' style='color:var(--ng)'>"+st.l+"<small> 負</small></div><div class='k'>敗北</div></div>"+
-    "<div class='stat'><div class='v'>"+st.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
-    "<div class='stat hi'><div class='v'>"+pctf(st.winRate)+"</div><div class='k'>勝率</div></div>"+
-    "<div class='stat hi'><div class='v'>"+st.points+"<small> pt</small></div><div class='k'>累計獲得ポイント</div></div>"+
-    "<div class='stat'><div class='v'>"+pctf(st.avgAcc)+"</div><div class='k'>平均正答率</div></div>"+
-    "<div class='stat'><div class='v'>"+secf(st.avgTime)+"</div><div class='k'>平均回答時間</div></div>"+
-    "<div class='stat'><div class='v'>"+st.streakBest+"<small> 連勝</small></div><div class='k'>連勝記録（最高）</div></div>"+
-    "<div class='stat'><div class='v'>🔥 "+st.streakCur+"<small> 連勝</small></div><div class='k'>現在の連勝数</div></div>"+
+    "<div class='app-stat hi'><div class='v'>"+st.total+"<small> 回</small></div><div class='k'>総対戦回数</div></div>"+
+    "<div class='app-stat'><div class='v' style='color:var(--ok)'>"+st.w+"<small> 勝</small></div><div class='k'>勝利</div></div>"+
+    "<div class='app-stat'><div class='v' style='color:var(--ng)'>"+st.l+"<small> 負</small></div><div class='k'>敗北</div></div>"+
+    "<div class='app-stat'><div class='v'>"+st.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
+    "<div class='app-stat hi'><div class='v'>"+pctf(st.winRate)+"</div><div class='k'>勝率</div></div>"+
+    "<div class='app-stat hi'><div class='v'>"+st.points+"<small> pt</small></div><div class='k'>累計獲得ポイント</div></div>"+
+    "<div class='app-stat'><div class='v'>"+pctf(st.avgAcc)+"</div><div class='k'>平均正答率</div></div>"+
+    "<div class='app-stat'><div class='v'>"+secf(st.avgTime)+"</div><div class='k'>平均回答時間</div></div>"+
+    "<div class='app-stat'><div class='v'>"+st.streakBest+"<small> 連勝</small></div><div class='k'>連勝記録（最高）</div></div>"+
+    "<div class='app-stat'><div class='v'>🔥 "+st.streakCur+"<small> 連勝</small></div><div class='k'>現在の連勝数</div></div>"+
     "</div></div>";
   html+="<div class='card'><h2>🕘 直近の対戦</h2>";
   if(!bs.length)html+="<div class='empty'><span class='big'>⚔️</span>まだ対戦記録がありません</div>";
@@ -3840,10 +3840,10 @@ function statsGraphs(m,el){
   html+="<div class='card'><h2>⏱ 平均回答時間の推移<small class='sub' style='font-weight:600'>（対戦ごと・秒）</small></h2><div class='chartbox'>"+chartLine(tm,lb,{color:"#06b6d4"})+"</div></div>";
   html+="<div class='card'><h2>🔄 英語→日本語 vs 日本語→英語</h2>"+
     "<div class='grid2'>"+
-    "<div class='stat'><div class='k'>英語→日本語 正答率</div><div class='v'>"+pctf(de.a?de.c/de.a:0)+"<small>　"+de.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(de.a?de.c/de.a*100:0)+"%'></i></div></div>"+
-    "<div class='stat'><div class='k'>日本語→英語 正答率</div><div class='v'>"+pctf(dj.a?dj.c/dj.a:0)+"<small>　"+dj.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(dj.a?dj.c/dj.a*100:0)+"%'></i></div></div>"+
-    "<div class='stat'><div class='k'>英語→日本語 平均時間</div><div class='v'>"+(de.a?secf(de.t/de.a):"−")+"</div></div>"+
-    "<div class='stat'><div class='k'>日本語→英語 平均時間</div><div class='v'>"+(dj.a?secf(dj.t/dj.a):"−")+"</div></div></div>"+
+    "<div class='app-stat'><div class='k'>英語→日本語 正答率</div><div class='v'>"+pctf(de.a?de.c/de.a:0)+"<small>　"+de.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(de.a?de.c/de.a*100:0)+"%'></i></div></div>"+
+    "<div class='app-stat'><div class='k'>日本語→英語 正答率</div><div class='v'>"+pctf(dj.a?dj.c/dj.a:0)+"<small>　"+dj.a+"問</small></div><div class='meter acc' style='margin-top:6px'><i style='width:"+(dj.a?dj.c/dj.a*100:0)+"%'></i></div></div>"+
+    "<div class='app-stat'><div class='k'>英語→日本語 平均時間</div><div class='v'>"+(de.a?secf(de.t/de.a):"−")+"</div></div>"+
+    "<div class='app-stat'><div class='k'>日本語→英語 平均時間</div><div class='v'>"+(dj.a?secf(dj.t/dj.a):"−")+"</div></div></div>"+
     "<div class='sub' style='margin-top:8px'>"+(de.c>=dj.c?"英語→日本語の方が得意です":"日本語→英語の方が得意です")+"（"+"対戦成績ベース"+"）</div></div>";
   el.innerHTML=html;
 }
@@ -3948,12 +3948,12 @@ function statsCompare(m,el){
     var oppLabel=o.isCpu?"🤖 "+esc(o.name):esc(o.name);
     html+="<div class='card'><h2>"+oppLabel+" <span class='badge "+(o.winRate>=0.5?"badge-success":"badge-error")+"'>勝率 "+pctf(o.winRate)+"</span></h2>"+
       "<div class='grid3'>"+
-      "<div class='stat'><div class='v'>"+o.matches+"<small> 回</small></div><div class='k'>通算対戦</div></div>"+
-      "<div class='stat'><div class='v' style='color:var(--ok)'>"+o.w+"<small> 勝</small></div><div class='k'>勝ち</div></div>"+
-      "<div class='stat'><div class='v' style='color:var(--ng)'>"+o.l+"<small> 負</small></div><div class='k'>負け</div></div>"+
-      "<div class='stat'><div class='v'>"+o.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
-      "<div class='stat'><div class='k'>自分の平均正答率</div><div class='v'>"+pctf(o.myAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.myAvgAcc*100)+"%'></i></div></div>"+
-      "<div class='stat'><div class='k'>相手の平均正答率</div><div class='v'>"+pctf(o.opAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.opAvgAcc*100)+"%'></i></div></div></div>"+
+      "<div class='app-stat'><div class='v'>"+o.matches+"<small> 回</small></div><div class='k'>通算対戦</div></div>"+
+      "<div class='app-stat'><div class='v' style='color:var(--ok)'>"+o.w+"<small> 勝</small></div><div class='k'>勝ち</div></div>"+
+      "<div class='app-stat'><div class='v' style='color:var(--ng)'>"+o.l+"<small> 負</small></div><div class='k'>負け</div></div>"+
+      "<div class='app-stat'><div class='v'>"+o.d+"<small> 分</small></div><div class='k'>引き分け</div></div>"+
+      "<div class='app-stat'><div class='k'>自分の平均正答率</div><div class='v'>"+pctf(o.myAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.myAvgAcc*100)+"%'></i></div></div>"+
+      "<div class='app-stat'><div class='k'>相手の平均正答率</div><div class='v'>"+pctf(o.opAvgAcc)+"</div><div class='meter acc' style='margin-top:5px'><i style='width:"+(o.opAvgAcc*100)+"%'></i></div></div></div>"+
       "<div class='rowbtns mt'><button class='btn sm ghost' data-exp='"+esc(o.key)+"'>得意・苦手の比較を見る</button></div>"+
       "<div data-cmp='"+esc(o.key)+"' style='display:none'></div></div>";
   });
@@ -4003,12 +4003,12 @@ SCREENS.battleDetail=function(params){
   var resB=b.me.res==="w"?"badge-success":b.me.res==="d"?"badge-warning":"badge-error";
   var html="<div class='card'><h2>📜 対戦詳細</h2><div class='sub'>"+dtf(b.date)+" ・ ルーム対戦 ・ ルーム "+esc(String(b.roomId).replace("room-",""))+" ・ "+b.questions.length+"問</div>"+
     "<div class='grid3 mt'>"+
-    "<div class='stat hi'><div class='v'><span class='badge "+resB+"' style='font-size:13px'>"+(b.me.res==="w"?"勝利":b.me.res==="d"?"引き分け":"敗北")+"</span></div><div class='k'>結果（"+b.me.rank+"位）</div></div>"+
-    "<div class='stat'><div class='v'>"+b.me.points+"<small> pt</small></div><div class='k'>獲得ポイント</div></div>"+
-    "<div class='stat'><div class='v'>"+pctf(b.me.accuracy)+"</div><div class='k'>正答率</div></div>"+
-    "<div class='stat'><div class='v'>"+b.me.correct+"<small> 問</small></div><div class='k'>正解数</div></div>"+
-    "<div class='stat'><div class='v'>"+b.me.wrong+"<small> 問</small></div><div class='k'>誤答数</div></div>"+
-    "<div class='stat'><div class='v'>"+secf(b.me.avgTimeMs)+"</div><div class='k'>平均回答時間</div></div></div>"+
+    "<div class='app-stat hi'><div class='v'><span class='badge "+resB+"' style='font-size:13px'>"+(b.me.res==="w"?"勝利":b.me.res==="d"?"引き分け":"敗北")+"</span></div><div class='k'>結果（"+b.me.rank+"位）</div></div>"+
+    "<div class='app-stat'><div class='v'>"+b.me.points+"<small> pt</small></div><div class='k'>獲得ポイント</div></div>"+
+    "<div class='app-stat'><div class='v'>"+pctf(b.me.accuracy)+"</div><div class='k'>正答率</div></div>"+
+    "<div class='app-stat'><div class='v'>"+b.me.correct+"<small> 問</small></div><div class='k'>正解数</div></div>"+
+    "<div class='app-stat'><div class='v'>"+b.me.wrong+"<small> 問</small></div><div class='k'>誤答数</div></div>"+
+    "<div class='app-stat'><div class='v'>"+secf(b.me.avgTimeMs)+"</div><div class='k'>平均回答時間</div></div></div>"+
     "<h3>最終順位</h3>";
   b.players.slice().sort(function(a,c){return a.rank-c.rank||c.points-a.points;}).forEach(function(p){
     html+="<div class='rk "+(p.pid===m.id?"me":"")+"'>"+(p.isCpu?"<span class='no'>🤖</span>":avatarHtml(p.pid,p.name))+
