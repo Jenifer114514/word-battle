@@ -34,7 +34,7 @@ var COLORS=["#6366f1","#ec4899","#10b981","#f59e0b","#06b6d4","#8b5cf6","#ef4444
 function colorOf(pid){var p=DB.profiles[pid];if(p&&p.color)return p.color;var h=0;var s=String(pid||"?");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLORS[h%COLORS.length];}
 function avatarHtml(pid,name,cls){var n=(name||"?").trim();var ch=n?n[0].toUpperCase():"?";var cls2=cls||"";
   return "<span class='avatar "+cls2+"' style='background:"+colorOf(pid)+"'>"+esc(ch)+"</span>";}
-function toast(msg){var t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);
+function toast(msg){var t=document.createElement("div");t.className="app-toast";t.textContent=msg;document.body.appendChild(t);
   setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(function(){t.remove();},320);},1900);}
 function dirName(dir){return dir==="ej"?"英→日":"日→英";}
 function nameTaken(name){for(var k in DB.profiles)if(DB.profiles[k].name===name)return DB.profiles[k];return null;}

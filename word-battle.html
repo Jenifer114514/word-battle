@@ -34,8 +34,15 @@ h1,h2,h3,h4{margin:0}
 .sig.r i.on{background:#fbbf24;animation:blink .8s infinite}
 .sig.off i{background:rgba(255,255,255,.22)}
 @keyframes blink{50%{opacity:.35}}
-.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex:none}
-.avatar.big{width:60px;height:60px;font-size:24px;margin:0 auto 8px}
+.colorgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;width:100%}
+.colorgrid .cbtn{aspect-ratio:1/1;min-width:0;padding:0;border:2.5px solid var(--line);border-radius:12px;background:#fff;
+  display:grid;place-items:center;cursor:pointer;transition:transform .12s}
+.colorgrid .cbtn:active{transform:scale(.9)}
+.colorgrid .cbtn span{display:block;width:60%;height:60%;border-radius:50%}
+@media(max-width:380px){.colorgrid{grid-template-columns:repeat(4,1fr)}}
+.avatar{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;color:#fff;flex:none;line-height:1;text-align:center;overflow:hidden}
+.avatar.big{width:60px;height:60px;font-size:24px;margin:0 auto 8px;line-height:1}
+
 #lockbtn{background:rgba(255,255,255,.16);border:0;color:#fff;border-radius:99px;width:34px;height:34px;font-size:15px;cursor:pointer}
 #lockbtn:active{transform:scale(.94)}
 /* ---------- layout ---------- */
@@ -148,7 +155,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid #c7d2fe;border-color:v
 .sheet{background:#fff;width:100%;max-width:580px;max-height:86vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px;animation:up .18s}
 @media(min-width:560px){.sheet{border-radius:20px}}
 .sheet h2{font-size:16.5px;margin-bottom:10px}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1e293b;color:#fff;padding:11px 20px;border-radius:99px;
+.app-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1e293b;color:#fff;padding:11px 20px;border-radius:99px;z-index:999;
   font-size:13.5px;font-weight:700;z-index:99;box-shadow:0 8px 24px rgba(0,0,0,.25);animation:fade .2s;max-width:88vw;text-align:center}
 /* ---------- misc ---------- */
 .empty{text-align:center;color:var(--sub);padding:36px 12px;font-size:14px;line-height:1.8}
@@ -2436,7 +2443,7 @@ var COLORS=["#6366f1","#ec4899","#10b981","#f59e0b","#06b6d4","#8b5cf6","#ef4444
 function colorOf(pid){var p=DB.profiles[pid];if(p&&p.color)return p.color;var h=0;var s=String(pid||"?");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return COLORS[h%COLORS.length];}
 function avatarHtml(pid,name,cls){var n=(name||"?").trim();var ch=n?n[0].toUpperCase():"?";var cls2=cls||"";
   return "<span class='avatar "+cls2+"' style='background:"+colorOf(pid)+"'>"+esc(ch)+"</span>";}
-function toast(msg){var t=document.createElement("div");t.className="toast";t.textContent=msg;document.body.appendChild(t);
+function toast(msg){var t=document.createElement("div");t.className="app-toast";t.textContent=msg;document.body.appendChild(t);
   setTimeout(function(){t.style.opacity="0";t.style.transition="opacity .3s";setTimeout(function(){t.remove();},320);},1900);}
 function dirName(dir){return dir==="ej"?"英→日":"日→英";}
 function nameTaken(name){for(var k in DB.profiles)if(DB.profiles[k].name===name)return DB.profiles[k];return null;}
@@ -4033,7 +4040,7 @@ SCREENS.account=function(){
     "<div class='sub'>🔒 記録はこの端末に保存されています</div></div>"+
     "<label class='f'>ユーザー名"+(canRename?"（変更できます）":"（次の変更は "+nextDay+" 以降）")+"</label>"+
     "<input type='text' id='acName' maxlength='12' value='"+esc(m.name)+"'"+(canRename?"":" disabled")+">"+
-    "<label class='f'>アイコン色</label><div class='join' id='acColor'>"+COLORS.map(function(c){return "<button class='btn join-item' data-v='"+c+"' style='"+(m.color===c?"border-color:"+c+";background:"+c+"22":"")+"'><span style='display:inline-block;width:18px;height:18px;border-radius:50%;background:"+c+"'></span></button>";}).join("")+"</div>"+
+    "<label class='f'>アイコン色</label><div class='colorgrid' id='acColor'>"+COLORS.map(function(c){return "<button type='button' class='cbtn' data-v='"+c+"' style='"+(m.color===c?"border-color:"+c+";background:"+c+"22":"")+"'><span style='background:"+c+"'></span></button>";}).join("")+"</div>"+
     "<button class='btn btn-primary w-full mt-3' id='acSave'>保存する</button>"+
     "<hr class='divh'><div class='rowbtns'><button class='btn btn-error' id='acReset' style='flex:1'>🗑 戦績・統計をリセット</button></div>"+
     "<div class='sub' style='margin-top:6px'>この端末に保存された対戦履歴・単語別統計を全消去します（元に戻せません）。</div>"+
@@ -4041,7 +4048,7 @@ SCREENS.account=function(){
     "</div><div class='rowbtns'><button class='btn btn-ghost w-full' id='acBack'>ホームへ</button></div>";
   app.innerHTML=html;
   var newColor=m.color;
-  $$("#acColor button",app).forEach(function(b){b.onclick=function(){newColor=b.getAttribute("data-v");$$("#acColor button",app).forEach(function(x){x.style.background=x===b?newColor+"22":"";x.style.borderColor=x===b?newColor:"";});};});
+  $$("#acColor .cbtn",app).forEach(function(b){b.onclick=function(){newColor=b.getAttribute("data-v");$$("#acColor .cbtn",app).forEach(function(x){x.style.background=x===b?newColor+"22":"";x.style.borderColor=x===b?newColor:"";});};});
   $("#acBack",app).onclick=function(){go("home");};
   $("#acSave",app).onclick=function(){
     var newName=$("#acName",app).value.trim();
